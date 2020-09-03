@@ -67,6 +67,8 @@ func (n *TreeNode) InsertAt(position int, node *TreeNode) error {
 	}
 	return errors.New("unable to insert nil node")
 }
+
+// Append adds a node to the end of the list.
 func (n *TreeNode) Append(node *TreeNode) error {
 	if node != nil {
 		n.children = append(n.children, node)

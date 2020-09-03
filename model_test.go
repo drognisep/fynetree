@@ -37,9 +37,11 @@ var rootNode *TreeNode
 var modelA mockModel
 var modelB mockModel
 var modelC mockModel
+var modelD mockModel
 var nodeA *TreeNode
 var nodeB *TreeNode
 var nodeC *TreeNode
+var nodeD *TreeNode
 
 func setup() {
 	rootModel = mockModel{text: "root"}
@@ -48,11 +50,13 @@ func setup() {
 	modelA = mockModel{text: "A"}
 	modelB = mockModel{text: "B"}
 	modelC = mockModel{text: "C"}
+	modelD = mockModel{text: "D"}
 	nodeA = NewTreeNode(modelA)
 	nodeB = NewTreeNode(modelB)
 	nodeC = NewTreeNode(modelC)
+	nodeD = NewTreeNode(modelD)
 
-	for _, m := range []mockModel{modelA, modelB, modelC} {
+	for _, m := range []mockModel{modelA, modelB, modelC, modelD} {
 		m.leaf = true
 	}
 }
@@ -80,11 +84,16 @@ func TestTreeNode_Append(t *testing.T) {
 			t.Errorf("Node was not inserted at the end of the child list")
 		}
 	}
+
+	err := rootNode.Append(nil)
+	if err == nil {
+		t.Errorf("Append should have guarded against a nil value")
+	}
 }
 
 func TestTreeNode_RemoveAt(t *testing.T) {
 	setup()
-	nodes := []*TreeNode{nodeA, nodeB, nodeC}
+	nodes := []*TreeNode{nodeA, nodeB, nodeC, nodeD}
 	for i, n := range nodes {
 		err := rootNode.Append(n)
 		if err != nil {
@@ -92,7 +101,7 @@ func TestTreeNode_RemoveAt(t *testing.T) {
 		}
 	}
 
-	if want, got := 3, len(rootNode.children); want != got {
+	if want, got := 4, len(rootNode.children); want != got {
 		t.Errorf("All nodes should have been appended to the root node")
 	}
 
@@ -112,6 +121,14 @@ func TestTreeNode_RemoveAt(t *testing.T) {
 		t.Errorf("Returned node does not equal expected nodeC")
 	}
 
+	removed, err = rootNode.RemoveAt(1)
+	if err != nil {
+		t.Errorf("Failed to remove nodeD: %v", err)
+	}
+	if want, got := nodeD, removed; want != got {
+		t.Errorf("Returned node does not equal expected nodeD")
+	}
+
 	removed, err = rootNode.RemoveAt(0)
 	if err != nil {
 		t.Errorf("Failed to remove nodeB: %v", err)
@@ -129,5 +146,40 @@ func TestTreeNode_RemoveAt(t *testing.T) {
 		if want, got := nilNode, n.parent; want != got {
 			t.Errorf("Node %d did not have its parent pointer reset", i)
 		}
+	}
+
+	_, err = rootNode.RemoveAt(100)
+	if err == nil {
+		t.Errorf("Error should have been thrown for index out of bounds")
+	}
+}
+
+func TestTreeNode_InsertAt(t *testing.T) {
+	setup()
+	nodes := []*TreeNode{nodeA, nodeB, nodeC}
+	nodeInsertionOrder := []*TreeNode{nodeB, nodeC, nodeA}
+	insertionIndices := []int{0, 0, 1}
+
+	for i, position := range insertionIndices {
+		node := nodes[i]
+		err := rootNode.InsertAt(position, node)
+		if err != nil {
+			t.Errorf("Failed to insert %v at position %d", node, position)
+		}
+	}
+
+	for i, want := range nodeInsertionOrder {
+		if got := rootNode.children[i]; got != want {
+			t.Errorf("Node %v at incorrect position %d, wanted %v", got, i, want)
+		}
+	}
+
+	err := rootNode.InsertAt(999, nodeD)
+	if err == nil {
+		t.Errorf("Should have returned an error for index out of bounds")
+	}
+	err = rootNode.InsertAt(0, nil)
+	if err == nil {
+		t.Errorf("Should have returned an error for index out of bounds")
 	}
 }
