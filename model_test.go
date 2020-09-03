@@ -183,3 +183,38 @@ func TestTreeNode_InsertAt(t *testing.T) {
 		t.Errorf("Should have returned an error for index out of bounds")
 	}
 }
+
+func TestTreeNode_Remove(t *testing.T) {
+	setup()
+	nodes := []*TreeNode{nodeA, nodeB, nodeC}
+	for i, n := range nodes {
+		err := rootNode.Append(n)
+		if err != nil {
+			t.Errorf("Error occurred appending node %d", i)
+		}
+	}
+
+	for i, n := range nodes {
+		removedNode, err := rootNode.Remove(n)
+		if err != nil {
+			t.Errorf("Error occurred removing node %d", i)
+		}
+		if want, got := n, removedNode; want != got {
+			t.Errorf("Wrong node removed from root. Wanted %v, got %v", want, got)
+		}
+	}
+
+	_, err := rootNode.Remove(nodeD)
+	if err == nil {
+		t.Errorf("Should have returned an error when attempting to remove non-existent nodeD")
+	}
+
+	_, err = rootNode.Remove(nil)
+	if err == nil {
+		t.Errorf("Should have returned an error when attempting to remove nil node")
+	}
+
+	if want, got := 0, len(rootNode.children); want != got {
+		t.Errorf("Not all nodes were removed")
+	}
+}

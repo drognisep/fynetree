@@ -14,30 +14,40 @@ type TreeNode struct {
 	expanded bool
 }
 
+// NewTreeNode constructs a tree node with the given model.
 func NewTreeNode(model TreeNodeModel) *TreeNode {
 	newNode := TreeNode{}
 	newNode.model = model
 	return &newNode
 }
 
+// GetParent gets the parent node, or nil if there is no parent.
 func (n *TreeNode) GetParent() *TreeNode {
 	return n.parent
 }
 
+// IsExpanded returns whether this node is expanded.
 func (n *TreeNode) IsExpanded() bool {
 	return n.expanded
 }
 
+// Expand expands the node and triggers the BeforeExpand hook in the model if it's not already expanded.
 func (n *TreeNode) Expand() {
-	n.model.BeforeExpand()
-	n.expanded = true
+	if !n.expanded {
+		n.model.BeforeExpand()
+		n.expanded = true
+	}
 }
 
+// Condense condenses the node and triggers the AfterCondense hook in the model if it's not already condensed.
 func (n *TreeNode) Condense() {
-	n.expanded = false
-	n.model.AfterCondense()
+	if n.expanded {
+		n.expanded = false
+		n.model.AfterCondense()
+	}
 }
 
+// ToggleExpand toggles the expand state of the node.
 func (n *TreeNode) ToggleExpand() {
 	if n.expanded {
 		n.Condense()
@@ -78,6 +88,7 @@ func (n *TreeNode) Append(node *TreeNode) error {
 	return errors.New("unable to append nil node")
 }
 
+// Remove the child node at the given position and return it. An error is returned if the index is invalid or the node is not found.
 func (n *TreeNode) RemoveAt(position int) (removedNode *TreeNode, err error) {
 	childrenLen := len(n.children)
 	if position == 0 {
@@ -97,6 +108,7 @@ func (n *TreeNode) RemoveAt(position int) (removedNode *TreeNode, err error) {
 	return
 }
 
+// Remove searches for the given node to remove and return it if it exists, returns nil and an error otherwise.
 func (n *TreeNode) Remove(node *TreeNode) (removedNode *TreeNode, err error) {
 	if node != nil {
 		for i, existing := range n.children {
