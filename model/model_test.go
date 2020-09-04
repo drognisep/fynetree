@@ -1,4 +1,4 @@
-package fynetree
+package model
 
 import (
 	"fmt"
