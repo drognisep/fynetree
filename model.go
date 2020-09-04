@@ -6,24 +6,82 @@ import (
 	"fyne.io/fyne"
 )
 
+// TreeNodeModel is the interface to user defined data.
+type TreeNodeModel interface {
+	// GetIconResource should return the user defined icon resource to show in the view, or nil if no icon is needed.
+	GetIconResource() *fyne.Resource
+
+	// GetText should return the user defined text to display for this node in the view, or "" if no text is needed.
+	GetText() string
+}
+
+// NodeEventHandler is a handler function for node events triggered by the view.
+type NodeEventHandler func()
+
+// ModelChangeListener is called to alert the view that state has changed.
+type ModelChangeListener func()
+
 // TreeNode holds a TreeNodeModel's position within the view.
 type TreeNode struct {
-	parent   *TreeNode
-	children []*TreeNode
-	model    TreeNodeModel
-	expanded bool
+	parent        *TreeNode
+	children      []*TreeNode
+	model         TreeNodeModel
+	expanded      bool
+	beforeExpand  NodeEventHandler
+	afterCondense NodeEventHandler
+	modelChanged  ModelChangeListener
+	leaf          bool
 }
 
 // NewTreeNode constructs a tree node with the given model.
 func NewTreeNode(model TreeNodeModel) *TreeNode {
 	newNode := TreeNode{}
 	newNode.model = model
+	newNode.beforeExpand = func() {}
+	newNode.afterCondense = func() {}
+	newNode.modelChanged = func() {}
+	newNode.leaf = false
 	return &newNode
 }
 
-// GetParent gets the parent node, or nil if there is no parent.
+// GetParent gets the parent node, or nil if this is a root node.
 func (n *TreeNode) GetParent() *TreeNode {
 	return n.parent
+}
+
+// GetModelIconResource gets the icon for this node.
+func (n *TreeNode) GetModelIconResource() *fyne.Resource {
+	return n.model.GetIconResource()
+}
+
+// GetModelText gets the text for this node.
+func (n *TreeNode) GetModelText() string {
+	return n.model.GetText()
+}
+
+// IsLeaf returns whether this is a leaf node.
+func (n *TreeNode) IsLeaf() bool {
+	return n.leaf
+}
+
+// SetLeaf sets this node to a leaf node.
+func (n *TreeNode) SetLeaf() {
+	n.leaf = true
+}
+
+// SetBranch sets this node to a branch node.
+func (n *TreeNode) SetBranch() {
+	n.leaf = false
+}
+
+// OnBeforeExpand sets the model handler for before the node has been expanded.
+func (n *TreeNode) OnBeforeExpand(handler NodeEventHandler) {
+	n.beforeExpand = handler
+}
+
+// OnAfterCondense sets the model handler for after the node has been condensed.
+func (n *TreeNode) OnAfterCondense(handler NodeEventHandler) {
+	n.afterCondense = handler
 }
 
 // IsExpanded returns whether this node is expanded.
@@ -34,7 +92,7 @@ func (n *TreeNode) IsExpanded() bool {
 // Expand expands the node and triggers the BeforeExpand hook in the model if it's not already expanded.
 func (n *TreeNode) Expand() {
 	if !n.expanded {
-		n.model.BeforeExpand()
+		n.beforeExpand()
 		n.expanded = true
 	}
 }
@@ -43,7 +101,7 @@ func (n *TreeNode) Expand() {
 func (n *TreeNode) Condense() {
 	if n.expanded {
 		n.expanded = false
-		n.model.AfterCondense()
+		n.afterCondense()
 	}
 }
 
@@ -54,6 +112,16 @@ func (n *TreeNode) ToggleExpand() {
 	} else {
 		n.Expand()
 	}
+}
+
+// OnModelChanged sets the view handler for when the model has changed.
+func (n *TreeNode) OnModelChanged(handler ModelChangeListener) {
+	n.modelChanged = handler
+}
+
+// ModelChanged triggered by the model to alert the view that the model has changed.
+func (n *TreeNode) ModelChanged() {
+	n.modelChanged()
 }
 
 // InsertAt a new TreeNode at the given position as a child of this node.
@@ -120,32 +188,4 @@ func (n *TreeNode) Remove(node *TreeNode) (removedNode *TreeNode, err error) {
 		return nil, errors.New("unable to reference nil node")
 	}
 	return nil, errors.New("unable to locate node")
-}
-
-// ModelChangeListener is called to alert the view that state has changed.
-type ModelChangeListener func()
-
-// TreeNodeModel is the interface to user defined data.
-type TreeNodeModel interface {
-	// GetIconResource should return the user defined icon resource to show in the view, or nil if no icon is needed.
-	GetIconResource() *fyne.Resource
-
-	// GetText should return the user defined text to display for this node in the view, or "" if no text is needed.
-	GetText() string
-
-	// AddChangeListener is a hook to allow the view to listen for change events and re-render the node.
-	// The provided listener is expected to be called by the user when the model view should be refreshed.
-	// It is also expected that multiple listeners may be added.
-	AddChangeListener(listener ModelChangeListener)
-
-	// BeforeExpand is an event hook called by the view before expansion. The model can take this opportunity to load
-	// children in the event that lazy loading is desired.
-	BeforeExpand()
-
-	// AfterCondense is an event hook called by the view after condensing. The model can use this to optionally unload
-	// resources in child nodes.
-	AfterCondense()
-
-	// IsLeaf is checked to determine whether this model supports node expansion.
-	IsLeaf() bool
 }

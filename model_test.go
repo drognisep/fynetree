@@ -20,18 +20,6 @@ func (m mockModel) GetText() string {
 	return m.text
 }
 
-func (m mockModel) AddChangeListener(listener ModelChangeListener) {
-	m.changeListeners = append(m.changeListeners, listener)
-}
-
-func (m mockModel) BeforeExpand() {}
-
-func (m mockModel) AfterCondense() {}
-
-func (m mockModel) IsLeaf() bool {
-	return m.leaf
-}
-
 var rootModel TreeNodeModel
 var rootNode *TreeNode
 var modelA mockModel
