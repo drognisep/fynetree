@@ -6,10 +6,13 @@ import (
 	"fyne.io/fyne"
 )
 
+type TreeView interface {
+}
+
 // TreeNodeModel is the interface to user defined data.
 type TreeNodeModel interface {
 	// GetIconResource should return the user defined icon resource to show in the view, or nil if no icon is needed.
-	GetIconResource() *fyne.Resource
+	GetIconResource() fyne.Resource
 
 	// GetText should return the user defined text to display for this node in the view, or "" if no text is needed.
 	GetText() string
@@ -31,17 +34,23 @@ type TreeNode struct {
 	afterCondense NodeEventHandler
 	modelChanged  ModelChangeListener
 	leaf          bool
+	View          TreeView
 }
 
 // NewTreeNode constructs a tree node with the given model.
 func NewTreeNode(model TreeNodeModel) *TreeNode {
-	newNode := TreeNode{}
+	newNode := &TreeNode{}
+	InitTreeNode(model, newNode)
+	return newNode
+}
+
+// InitTreeNode initializes a tree node.
+func InitTreeNode(model TreeNodeModel, newNode *TreeNode) {
 	newNode.model = model
 	newNode.beforeExpand = func() {}
 	newNode.afterCondense = func() {}
 	newNode.modelChanged = func() {}
 	newNode.leaf = false
-	return &newNode
 }
 
 // GetParent gets the parent node, or nil if this is a root node.
@@ -49,8 +58,13 @@ func (n *TreeNode) GetParent() *TreeNode {
 	return n.parent
 }
 
+// GetChildren gets the children in this node.
+func (n *TreeNode) GetChildren() []*TreeNode {
+	return n.children
+}
+
 // GetModelIconResource gets the icon for this node.
-func (n *TreeNode) GetModelIconResource() *fyne.Resource {
+func (n *TreeNode) GetModelIconResource() fyne.Resource {
 	return n.model.GetIconResource()
 }
 
