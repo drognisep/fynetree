@@ -3,12 +3,13 @@ package fynetree
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/drognisep/fynetree/model"
 )
 
 const (
-	HierarchyPadding = 16
+	HierarchyPadding = 32
 )
 
 type Tree struct {
@@ -44,9 +45,14 @@ func nodeContent(node *model.TreeNode) fyne.CanvasObject {
 	childNodes := node.GetChildren()
 	if len(childNodes) > 0 {
 		var childCanvasObjects []fyne.CanvasObject
-		if !node.IsLeaf() && node.IsExpanded() {
-			for _, c := range childNodes {
-				childCanvasObjects = append(childCanvasObjects, nodeContent(c))
+		if !node.IsLeaf() {
+			if node.IsExpanded() {
+				nodeObjects = prependExpandedIcon(nodeObjects)
+				for _, c := range childNodes {
+					childCanvasObjects = append(childCanvasObjects, nodeContent(c))
+				}
+			} else {
+				nodeObjects = prependCondensedIcon(nodeObjects)
 			}
 		}
 		container = fyne.NewContainerWithLayout(
@@ -57,10 +63,22 @@ func nodeContent(node *model.TreeNode) fyne.CanvasObject {
 	} else {
 		container = fyne.NewContainerWithLayout(
 			layout.NewHBoxLayout(),
-			nodeObjects...
+			nodeObjects...,
 		)
 	}
 	return container
+}
+
+func prependCondensedIcon(nodeObjects []fyne.CanvasObject) []fyne.CanvasObject {
+	condensedIcon := widget.NewIcon(theme.MenuExpandIcon())
+	nodeObjects = append([]fyne.CanvasObject{condensedIcon}, nodeObjects...)
+	return nodeObjects
+}
+
+func prependExpandedIcon(nodeObjects []fyne.CanvasObject) []fyne.CanvasObject {
+	expandedIcon := widget.NewIcon(theme.MenuDropDownIcon())
+	nodeObjects = append([]fyne.CanvasObject{expandedIcon}, nodeObjects...)
+	return nodeObjects
 }
 
 func hierarchySpacer() *layout.Spacer {
