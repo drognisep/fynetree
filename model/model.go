@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"fyne.io/fyne"
+	"sync"
 )
 
 type TreeView interface {
@@ -21,8 +22,8 @@ type TreeNodeModel interface {
 // NodeEventHandler is a handler function for node events triggered by the view.
 type NodeEventHandler func()
 
-// ModelChangeListener is called to alert the view that state has changed.
-type ModelChangeListener func()
+// ChangeListener is called to alert the view that state has changed.
+type ChangeListener func()
 
 // TreeNode holds a TreeNodeModel's position within the view.
 type TreeNode struct {
@@ -32,9 +33,10 @@ type TreeNode struct {
 	expanded      bool
 	beforeExpand  NodeEventHandler
 	afterCondense NodeEventHandler
-	modelChanged  ModelChangeListener
+	modelChanged  ChangeListener
 	leaf          bool
 	View          TreeView
+	mux           sync.Mutex
 }
 
 // NewTreeNode constructs a tree node with the given model.
@@ -106,16 +108,22 @@ func (n *TreeNode) IsExpanded() bool {
 // Expand expands the node and triggers the BeforeExpand hook in the model if it's not already expanded.
 func (n *TreeNode) Expand() {
 	if !n.expanded {
+		n.mux.Lock()
 		n.beforeExpand()
 		n.expanded = true
+		n.mux.Unlock()
+		n.ModelChanged()
 	}
 }
 
 // Condense condenses the node and triggers the AfterCondense hook in the model if it's not already condensed.
 func (n *TreeNode) Condense() {
 	if n.expanded {
+		n.mux.Lock()
 		n.expanded = false
 		n.afterCondense()
+		n.mux.Unlock()
+		n.ModelChanged()
 	}
 }
 
@@ -129,7 +137,7 @@ func (n *TreeNode) ToggleExpand() {
 }
 
 // OnModelChanged sets the view handler for when the model has changed.
-func (n *TreeNode) OnModelChanged(handler ModelChangeListener) {
+func (n *TreeNode) OnModelChanged(handler ChangeListener) {
 	n.modelChanged = handler
 }
 
@@ -140,9 +148,11 @@ func (n *TreeNode) ModelChanged() {
 
 // InsertAt a new TreeNode at the given position as a child of this node.
 func (n *TreeNode) InsertAt(position int, node *TreeNode) error {
+	n.mux.Lock()
 	if node != nil {
 		childrenLen := len(n.children)
 		if position == childrenLen {
+			n.mux.Unlock()
 			err := n.Append(node)
 			return err
 		} else if position == 0 {
@@ -152,19 +162,26 @@ func (n *TreeNode) InsertAt(position int, node *TreeNode) error {
 			copy(n.children[(position+1):], n.children[position:])
 			n.children[position] = node
 		} else {
+			n.mux.Unlock()
 			return fmt.Errorf("position %d is out of bounds for %d length children", position, childrenLen)
 		}
 		node.parent = n
+		n.mux.Unlock()
+		n.modelChanged()
 		return nil
 	}
+	n.mux.Unlock()
 	return errors.New("unable to insert nil node")
 }
 
 // Append adds a node to the end of the list.
 func (n *TreeNode) Append(node *TreeNode) error {
 	if node != nil {
+		n.mux.Lock()
 		n.children = append(n.children, node)
 		node.parent = n
+		n.mux.Unlock()
+		n.modelChanged()
 		return nil
 	}
 	return errors.New("unable to append nil node")
@@ -172,6 +189,14 @@ func (n *TreeNode) Append(node *TreeNode) error {
 
 // Remove the child node at the given position and return it. An error is returned if the index is invalid or the node is not found.
 func (n *TreeNode) RemoveAt(position int) (removedNode *TreeNode, err error) {
+	n.mux.Lock()
+	removedNode, err = n.removeAtImpl(position)
+	n.mux.Unlock()
+	n.modelChanged()
+	return
+}
+
+func (n *TreeNode) removeAtImpl(position int) (removedNode *TreeNode, err error) {
 	childrenLen := len(n.children)
 	if position == 0 {
 		removedNode = n.children[position]
@@ -192,14 +217,32 @@ func (n *TreeNode) RemoveAt(position int) (removedNode *TreeNode, err error) {
 
 // Remove searches for the given node to remove and return it if it exists, returns nil and an error otherwise.
 func (n *TreeNode) Remove(node *TreeNode) (removedNode *TreeNode, err error) {
+	n.mux.Lock()
 	if node != nil {
 		for i, existing := range n.children {
 			if existing == node {
-				return n.RemoveAt(i)
+				removedNode, err := n.removeAtImpl(i)
+				n.mux.Unlock()
+				n.modelChanged()
+				return removedNode, err
 			}
 		}
 	} else {
+		n.mux.Unlock()
 		return nil, errors.New("unable to reference nil node")
 	}
+	n.mux.Unlock()
 	return nil, errors.New("unable to locate node")
+}
+
+// RemoveAll unlinks the node and all child nodes.
+func (n *TreeNode) RemoveAll() {
+	n.mux.Lock()
+	numChildren := len(n.children)
+	for i := 0; i < numChildren; i++ {
+		node, _ := n.removeAtImpl(0)
+		node.RemoveAll()
+	}
+	n.mux.Unlock()
+	n.modelChanged()
 }

@@ -7,12 +7,12 @@ import (
 )
 
 type mockModel struct {
-	changeListeners []ModelChangeListener
+	changeListeners []ChangeListener
 	text            string
 	leaf            bool
 }
 
-func (m mockModel) GetIconResource() *fyne.Resource {
+func (m mockModel) GetIconResource() fyne.Resource {
 	return nil
 }
 
@@ -204,5 +204,29 @@ func TestTreeNode_Remove(t *testing.T) {
 
 	if want, got := 0, len(rootNode.children); want != got {
 		t.Errorf("Not all nodes were removed")
+	}
+}
+
+func TestTreeNode_RemoveAll(t *testing.T) {
+	setup()
+	nodes := []*TreeNode{nodeA, nodeB, nodeC}
+	for _, n := range nodes {
+		err := rootNode.Append(n)
+		if err != nil {
+			t.Errorf("Expected Append error to be nil: %v", err)
+		}
+	}
+	err := nodeC.Append(nodeD)
+	if err != nil {
+		t.Errorf("Expected Append error to be nil: %v", err)
+	}
+
+	rootNode.RemoveAll()
+	if got, want := len(rootNode.children), 0; got != want {
+		t.Errorf("Root node should be empty, has %d children", got)
+	}
+
+	if got, want := len(nodeC.children), 0; got != want {
+		t.Errorf("Node C should be empty, has %d children", got)
 	}
 }
