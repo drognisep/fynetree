@@ -19,6 +19,29 @@ type TreeNodeModel interface {
 	GetText() string
 }
 
+var _ TreeNodeModel = (*staticNodeModel)(nil)
+
+type staticNodeModel struct {
+	resource fyne.Resource
+	text     string
+}
+
+func (s *staticNodeModel) GetIconResource() fyne.Resource {
+	return s.resource
+}
+
+func (s *staticNodeModel) GetText() string {
+	return s.text
+}
+
+// NewStaticModel creates a TreeNodeModel with fixed values that never change.
+func NewStaticModel(resource fyne.Resource, text string) TreeNodeModel {
+	return &staticNodeModel{
+		resource: resource,
+		text:     text,
+	}
+}
+
 // NodeEventHandler is a handler function for node events triggered by the view.
 type NodeEventHandler func()
 

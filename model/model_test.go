@@ -2,51 +2,32 @@ package model
 
 import (
 	"fmt"
-	"fyne.io/fyne"
 	"testing"
 )
 
-type mockModel struct {
-	changeListeners []ChangeListener
-	text            string
-	leaf            bool
-}
-
-func (m mockModel) GetIconResource() fyne.Resource {
-	return nil
-}
-
-func (m mockModel) GetText() string {
-	return m.text
-}
-
 var rootModel TreeNodeModel
 var rootNode *TreeNode
-var modelA mockModel
-var modelB mockModel
-var modelC mockModel
-var modelD mockModel
+var modelA TreeNodeModel
+var modelB TreeNodeModel
+var modelC TreeNodeModel
+var modelD TreeNodeModel
 var nodeA *TreeNode
 var nodeB *TreeNode
 var nodeC *TreeNode
 var nodeD *TreeNode
 
 func setup() {
-	rootModel = mockModel{text: "root"}
+	rootModel = NewStaticModel(nil, "root")
 	rootNode = NewTreeNode(rootModel)
 
-	modelA = mockModel{text: "A"}
-	modelB = mockModel{text: "B"}
-	modelC = mockModel{text: "C"}
-	modelD = mockModel{text: "D"}
+	modelA = NewStaticModel(nil, "A")
+	modelB = NewStaticModel(nil, "B")
+	modelC = NewStaticModel(nil, "C")
+	modelD = NewStaticModel(nil, "D")
 	nodeA = NewTreeNode(modelA)
 	nodeB = NewTreeNode(modelB)
 	nodeC = NewTreeNode(modelC)
 	nodeD = NewTreeNode(modelD)
-
-	for _, m := range []mockModel{modelA, modelB, modelC, modelD} {
-		m.leaf = true
-	}
 }
 
 func TestTreeNode_Append(t *testing.T) {
