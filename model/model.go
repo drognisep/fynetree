@@ -7,9 +7,6 @@ import (
 	"sync"
 )
 
-type TreeView interface {
-}
-
 // TreeNodeModel is the interface to user defined data.
 type TreeNodeModel interface {
 	// GetIconResource should return the user defined icon resource to show in the view, or nil if no icon is needed.
@@ -50,16 +47,16 @@ type ChangeListener func()
 
 // TreeNode holds a TreeNodeModel's position within the view.
 type TreeNode struct {
-	parent        *TreeNode
-	children      []*TreeNode
 	model         TreeNodeModel
 	expanded      bool
 	beforeExpand  NodeEventHandler
 	afterCondense NodeEventHandler
-	modelChanged  ChangeListener
 	leaf          bool
-	View          TreeView
-	mux           sync.Mutex
+	View          fyne.CanvasObject
+
+	mux      sync.Mutex
+	parent   *TreeNode
+	children []*TreeNode
 }
 
 // NewTreeNode constructs a tree node with the given model.
@@ -74,7 +71,6 @@ func InitTreeNode(model TreeNodeModel, newNode *TreeNode) {
 	newNode.model = model
 	newNode.beforeExpand = func() {}
 	newNode.afterCondense = func() {}
-	newNode.modelChanged = func() {}
 	newNode.leaf = false
 }
 
@@ -85,7 +81,10 @@ func (n *TreeNode) GetParent() *TreeNode {
 
 // GetChildren gets the children in this node.
 func (n *TreeNode) GetChildren() []*TreeNode {
-	return n.children
+	n.mux.Lock()
+	defer n.mux.Unlock()
+	children := n.children
+	return children
 }
 
 // GetModelIconResource gets the icon for this node.
@@ -101,6 +100,11 @@ func (n *TreeNode) GetModelText() string {
 // IsLeaf returns whether this is a leaf node.
 func (n *TreeNode) IsLeaf() bool {
 	return n.leaf
+}
+
+// IsBranch returns whether this is a branch node.
+func (n *TreeNode) IsBranch() bool {
+	return !n.leaf
 }
 
 // SetLeaf sets this node to a leaf node.
@@ -135,7 +139,7 @@ func (n *TreeNode) Expand() {
 		n.beforeExpand()
 		n.expanded = true
 		n.mux.Unlock()
-		n.ModelChanged()
+		n.refreshView()
 	}
 }
 
@@ -146,7 +150,7 @@ func (n *TreeNode) Condense() {
 		n.expanded = false
 		n.afterCondense()
 		n.mux.Unlock()
-		n.ModelChanged()
+		n.refreshView()
 	}
 }
 
@@ -157,16 +161,6 @@ func (n *TreeNode) ToggleExpand() {
 	} else {
 		n.Expand()
 	}
-}
-
-// OnModelChanged sets the view handler for when the model has changed.
-func (n *TreeNode) OnModelChanged(handler ChangeListener) {
-	n.modelChanged = handler
-}
-
-// ModelChanged triggered by the model to alert the view that the model has changed.
-func (n *TreeNode) ModelChanged() {
-	n.modelChanged()
 }
 
 // InsertAt a new TreeNode at the given position as a child of this node.
@@ -190,7 +184,7 @@ func (n *TreeNode) InsertAt(position int, node *TreeNode) error {
 		}
 		node.parent = n
 		n.mux.Unlock()
-		n.modelChanged()
+		n.refreshView()
 		return nil
 	}
 	n.mux.Unlock()
@@ -204,7 +198,7 @@ func (n *TreeNode) Append(node *TreeNode) error {
 		n.children = append(n.children, node)
 		node.parent = n
 		n.mux.Unlock()
-		n.modelChanged()
+		n.refreshView()
 		return nil
 	}
 	return errors.New("unable to append nil node")
@@ -215,7 +209,7 @@ func (n *TreeNode) RemoveAt(position int) (removedNode *TreeNode, err error) {
 	n.mux.Lock()
 	removedNode, err = n.removeAtImpl(position)
 	n.mux.Unlock()
-	n.modelChanged()
+	n.refreshView()
 	return
 }
 
@@ -235,6 +229,7 @@ func (n *TreeNode) removeAtImpl(position int) (removedNode *TreeNode, err error)
 		return
 	}
 	removedNode.parent = nil
+	removedNode.View = nil
 	return
 }
 
@@ -246,7 +241,7 @@ func (n *TreeNode) Remove(node *TreeNode) (removedNode *TreeNode, err error) {
 			if existing == node {
 				removedNode, err := n.removeAtImpl(i)
 				n.mux.Unlock()
-				n.modelChanged()
+				n.refreshView()
 				return removedNode, err
 			}
 		}
@@ -267,5 +262,11 @@ func (n *TreeNode) RemoveAll() {
 		node.RemoveAll()
 	}
 	n.mux.Unlock()
-	n.modelChanged()
+	n.refreshView()
+}
+
+func (n *TreeNode) refreshView() {
+	if n.View != nil {
+		n.View.Refresh()
+	}
 }

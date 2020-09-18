@@ -23,17 +23,18 @@ func NewExpandHandle(node *model.TreeNode) *expandHandle {
 }
 
 func (e *expandHandle) Refresh() {
-	if e.node.IsLeaf() {
-		e.Hide()
-	} else {
-		e.Show()
-		if e.node.IsExpanded() {
-			e.SetResource(theme.MenuDropDownIcon())
+	if e.node != nil {
+		if e.node.IsLeaf() {
+			e.Hide()
 		} else {
-			e.SetResource(theme.MenuExpandIcon())
+			e.Show()
+			if e.node.IsExpanded() {
+				e.SetResource(theme.MenuDropDownIcon())
+			} else {
+				e.SetResource(theme.MenuExpandIcon())
+			}
 		}
 	}
-	e.Icon.Refresh()
 }
 
 func (e *expandHandle) Tapped(event *fyne.PointEvent) {

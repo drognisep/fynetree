@@ -1,8 +1,11 @@
 package fynetree
 
-func intMax(a int, b int) int {
-	if a < b {
-		return b
+func intMax(ints ...int) int {
+	var max int
+	for _, i := range ints {
+		if i > max {
+			max = i
+		}
 	}
-	return a
+	return max
 }

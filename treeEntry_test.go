@@ -1,11 +1,9 @@
 package fynetree
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/layout"
+	"fyne.io/fyne/test"
 	"github.com/drognisep/fynetree/model"
 	"testing"
-	"fyne.io/fyne/test"
 )
 
 var rootNode *model.TreeNode
@@ -45,26 +43,20 @@ func TestNewTreeEntry(t *testing.T) {
 	setup()
 	testApp := test.NewApp()
 	win := testApp.NewWindow("Testing")
-	entry := NewTreeEntry(rootNode)
-	win.SetContent(fyne.NewContainerWithLayout(
-		layout.NewVBoxLayout(),
-		entry,
-	))
+	rootEntry := NewTreeEntry(rootNode)
+	win.SetContent(rootEntry)
 
 	win.ShowAndRun()
 
-	if entry.Hidden {
-		t.Errorf("Root entry should not be hidden")
+	if rootEntry.Hidden {
+		t.Errorf("Root rootEntry should not be hidden")
 	}
-	if entry.itemBox.Hidden {
-		t.Errorf("Item box is hidden")
+	if nodeA.View.Visible() {
+		t.Errorf("Node A should not be visible yet")
 	}
 
-	test.Tap(entry.handle)
-	itemPos := entry.itemBox.Position()
-	childPos := entry.childBox.Position()
-
-	if offset := childPos.X - itemPos.X; offset != HierarchyPadding {
-		t.Errorf("Offset should be %d, not %d", HierarchyPadding, offset)
+	rootNode.Expand()
+	if !nodeA.View.Visible() {
+		t.Errorf("Node A is not visible after expanding the root node")
 	}
 }
