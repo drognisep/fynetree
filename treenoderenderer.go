@@ -11,29 +11,21 @@ const (
 )
 
 type treeEntryRenderer struct {
-	node       *TreeNode
-	handle     *expandHandle
-	icon       *widget.Icon
-	label      *widget.Label
-	childBox   *widget.Box
-	childNodes []fyne.CanvasObject
+	node   *TreeNode
+	handle *expandHandle
+	icon   *widget.Icon
+	label  *widget.Label
 }
 
 func newTreeEntryRenderer(node *TreeNode) fyne.WidgetRenderer {
 	handle := NewExpandHandle(node)
 	icon := widget.NewIcon(node.GetModelIconResource())
 	label := widget.NewLabel(node.GetModelText())
-	var childNodes []fyne.CanvasObject
-	for _, c := range node.GetChildren() {
-		childNodes = append(childNodes, c)
-	}
 	return &treeEntryRenderer{
-		node:     node,
-		handle:   handle,
-		icon:     icon,
-		label:    label,
-		childBox: widget.NewVBox(childNodes...),
-		childNodes: childNodes,
+		node:   node,
+		handle: handle,
+		icon:   icon,
+		label:  label,
 	}
 }
 
@@ -69,21 +61,35 @@ func (renderer treeEntryRenderer) Layout(container fyne.Size) {
 	} else {
 		labelWidth = 0
 	}
-	childBox := renderer.childBox
 	if node.IsBranch() && node.IsExpanded() {
-		childBox.Show()
-		childBoxSize := childBox.MinSize()
-		childBox.Move(fyne.NewPos(HierarchyPadding, itemsHeight))
-		childBox.Resize(fyne.NewSize(container.Width-HierarchyPadding, childBoxSize.Height))
+		var runningY int = itemsHeight
+		for _, c := range node.children {
+			cSize := c.MinSize()
+			c.Move(fyne.NewPos(HierarchyPadding, runningY))
+			c.Resize(fyne.NewSize(container.Width-HierarchyPadding, cSize.Height))
+			runningY += cSize.Height
+			c.Show()
+		}
 	} else {
-		childBox.Hide()
+		for _, c := range node.children {
+			c.Hide()
+		}
 	}
 }
 
 func (renderer treeEntryRenderer) MinSize() fyne.Size {
 	entryItemsSize := renderer.entryItemsMinSize()
-	childBoxSize := renderer.childBox.MinSize()
-	return fyne.NewSize(intMax(entryItemsSize.Width, childBoxSize.Width+HierarchyPadding), entryItemsSize.Height+childBoxSize.Height)
+	var childrenSize fyne.Size
+	for _, c := range renderer.node.children {
+		if c.Visible() {
+			childSize := c.MinSize()
+			childrenSize = fyne.Size{
+				Width:  intMax(childrenSize.Width, childSize.Width),
+				Height: childrenSize.Height + childSize.Height,
+			}
+		}
+	}
+	return fyne.NewSize(intMax(entryItemsSize.Width, childrenSize.Width+HierarchyPadding), entryItemsSize.Height+childrenSize.Height)
 }
 
 func (renderer treeEntryRenderer) entryItemsMinSize() fyne.Size {
@@ -97,7 +103,6 @@ func (renderer treeEntryRenderer) entryItemsMinSize() fyne.Size {
 
 func (renderer treeEntryRenderer) Refresh() {
 	renderer.updateItemBoxState()
-	renderer.recreateChildBox()
 }
 
 func (renderer *treeEntryRenderer) updateItemBoxState() {
@@ -122,22 +127,12 @@ func (renderer *treeEntryRenderer) updateItemBoxState() {
 	}
 }
 
-func (renderer treeEntryRenderer) recreateChildBox() {
-	node := renderer.node
-	var childObjects []fyne.CanvasObject
-	for _, c := range node.GetChildren() {
-		childObjects = append(childObjects, c)
-	}
-	renderer.childBox.Children = childObjects
-	renderer.childBox.Refresh()
-}
-
 func (renderer treeEntryRenderer) BackgroundColor() color.Color {
 	return color.Transparent
 }
 
 func (renderer *treeEntryRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{renderer.handle, renderer.icon, renderer.label, renderer.childBox}
+	return append([]fyne.CanvasObject{renderer.handle, renderer.icon, renderer.label}, renderer.node.children...)
 }
 
 func (renderer *treeEntryRenderer) Destroy() {
@@ -145,7 +140,6 @@ func (renderer *treeEntryRenderer) Destroy() {
 	renderer.handle = nil
 	renderer.icon = nil
 	renderer.label = nil
-	renderer.childBox = nil
 	renderer.node = nil
 }
 
