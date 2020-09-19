@@ -34,18 +34,13 @@ func (renderer treeEntryRenderer) Layout(container fyne.Size) {
 	itemsHeight := renderer.entryItemsMinSize().Height
 	handle := renderer.handle
 	handleSize := handle.MinSize()
-	var handleWidth int
-	if handle.Visible() {
-		handleWidth = handleSize.Width
-		handle.Move(fyne.NewPos(0, 0))
-		handle.Resize(fyne.NewSize(handleWidth, itemsHeight))
-	} else {
-		handleWidth = 0
-	}
+	handleWidth := handleSize.Width
+	handle.Move(fyne.NewPos(0, 0))
+	handle.Resize(fyne.NewSize(handleWidth, itemsHeight))
 	icon := renderer.icon
 	iconSize := icon.MinSize()
 	var iconWidth int
-	if icon.Visible() {
+	if icon.Resource != nil {
 		iconWidth = iconSize.Width
 		icon.Move(fyne.NewPos(handleWidth, 0))
 		icon.Resize(fyne.NewSize(iconWidth, itemsHeight))
@@ -54,7 +49,7 @@ func (renderer treeEntryRenderer) Layout(container fyne.Size) {
 	}
 	label := renderer.label
 	var labelWidth int
-	if label.Visible() {
+	if label.Text != "" {
 		labelWidth = container.Width - handleWidth - iconWidth
 		label.Move(fyne.NewPos(handleWidth+iconWidth, 0))
 		label.Resize(fyne.NewSize(labelWidth, itemsHeight))
