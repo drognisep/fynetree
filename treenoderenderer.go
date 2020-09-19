@@ -3,7 +3,6 @@ package fynetree
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/widget"
-	"github.com/drognisep/fynetree/model"
 	"image/color"
 )
 
@@ -12,27 +11,34 @@ const (
 )
 
 type treeEntryRenderer struct {
-	entry    *TreeEntry
-	handle   *expandHandle
-	icon     *widget.Icon
-	label    *widget.Label
-	childBox *widget.Box
+	node       *TreeNode
+	handle     *expandHandle
+	icon       *widget.Icon
+	label      *widget.Label
+	childBox   *widget.Box
+	childNodes []fyne.CanvasObject
 }
 
-func newTreeEntryRenderer(entry *TreeEntry) fyne.WidgetRenderer {
-	handle := NewExpandHandle(entry.Node)
-	icon := widget.NewIcon(entry.Node.GetModelIconResource())
-	label := widget.NewLabel(entry.Node.GetModelText())
+func newTreeEntryRenderer(node *TreeNode) fyne.WidgetRenderer {
+	handle := NewExpandHandle(node)
+	icon := widget.NewIcon(node.GetModelIconResource())
+	label := widget.NewLabel(node.GetModelText())
+	var childNodes []fyne.CanvasObject
+	for _, c := range node.GetChildren() {
+		childNodes = append(childNodes, c)
+	}
 	return &treeEntryRenderer{
-		entry:    entry,
+		node:     node,
 		handle:   handle,
 		icon:     icon,
 		label:    label,
-		childBox: widget.NewVBox(),
+		childBox: widget.NewVBox(childNodes...),
+		childNodes: childNodes,
 	}
 }
 
 func (renderer treeEntryRenderer) Layout(container fyne.Size) {
+	node := renderer.node
 	itemsHeight := renderer.entryItemsMinSize().Height
 	handle := renderer.handle
 	handleSize := handle.MinSize()
@@ -64,10 +70,13 @@ func (renderer treeEntryRenderer) Layout(container fyne.Size) {
 		labelWidth = 0
 	}
 	childBox := renderer.childBox
-	if childBox.Visible() {
+	if node.IsBranch() && node.IsExpanded() {
+		childBox.Show()
 		childBoxSize := childBox.MinSize()
 		childBox.Move(fyne.NewPos(HierarchyPadding, itemsHeight))
 		childBox.Resize(fyne.NewSize(container.Width-HierarchyPadding, childBoxSize.Height))
+	} else {
+		childBox.Hide()
 	}
 }
 
@@ -91,25 +100,8 @@ func (renderer treeEntryRenderer) Refresh() {
 	renderer.recreateChildBox()
 }
 
-func (renderer treeEntryRenderer) BackgroundColor() color.Color {
-	return color.Transparent
-}
-
-func (renderer *treeEntryRenderer) Objects() []fyne.CanvasObject {
-	return []fyne.CanvasObject{renderer.handle, renderer.icon, renderer.label, renderer.childBox}
-}
-
-func (renderer *treeEntryRenderer) Destroy() {
-	renderer.handle.node = nil
-	renderer.handle = nil
-	renderer.icon = nil
-	renderer.label = nil
-	renderer.childBox = nil
-	renderer.entry = nil
-}
-
 func (renderer *treeEntryRenderer) updateItemBoxState() {
-	node := renderer.entry.Node
+	node := renderer.node
 
 	renderer.handle.Refresh()
 	// Update icon and label from view model
@@ -131,43 +123,31 @@ func (renderer *treeEntryRenderer) updateItemBoxState() {
 }
 
 func (renderer treeEntryRenderer) recreateChildBox() {
-	node := renderer.entry.Node
-	if node.IsBranch() && node.IsExpanded() {
-		var childObjects []fyne.CanvasObject
-		for _, childNode := range node.GetChildren() {
-			childView := childNode.View
-			if childView != nil {
-				childObjects = append(childObjects, childView)
-			}
-		}
-		renderer.childBox = widget.NewVBox(childObjects...)
-	} else {
-		renderer.childBox = widget.NewVBox()
-		renderer.childBox.Hide()
+	node := renderer.node
+	var childObjects []fyne.CanvasObject
+	for _, c := range node.GetChildren() {
+		childObjects = append(childObjects, c)
 	}
+	renderer.childBox.Children = childObjects
+	renderer.childBox.Refresh()
 }
 
-var _ fyne.Widget = (*TreeEntry)(nil)
-var _ fyne.CanvasObject = (*TreeEntry)(nil)
-
-type TreeEntry struct {
-	widget.BaseWidget
-	Node *model.TreeNode
+func (renderer treeEntryRenderer) BackgroundColor() color.Color {
+	return color.Transparent
 }
 
-func NewTreeEntry(node *model.TreeNode) *TreeEntry {
-	if node == nil {
-		return nil
-	}
-	view := &TreeEntry{
-		Node: node,
-	}
-	node.View = view
-	view.ExtendBaseWidget(view)
-
-	return view
+func (renderer *treeEntryRenderer) Objects() []fyne.CanvasObject {
+	return []fyne.CanvasObject{renderer.handle, renderer.icon, renderer.label, renderer.childBox}
 }
 
-func (entry *TreeEntry) CreateRenderer() fyne.WidgetRenderer {
-	return newTreeEntryRenderer(entry)
+func (renderer *treeEntryRenderer) Destroy() {
+	renderer.handle.node = nil
+	renderer.handle = nil
+	renderer.icon = nil
+	renderer.label = nil
+	renderer.childBox = nil
+	renderer.node = nil
 }
+
+var _ fyne.Widget = (*TreeNode)(nil)
+var _ fyne.CanvasObject = (*TreeNode)(nil)

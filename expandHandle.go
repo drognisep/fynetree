@@ -4,16 +4,15 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
-	"github.com/drognisep/fynetree/model"
 )
 
 type expandHandle struct {
 	widget.Icon
 
-	node *model.TreeNode
+	node *TreeNode
 }
 
-func NewExpandHandle(node *model.TreeNode) *expandHandle {
+func NewExpandHandle(node *TreeNode) *expandHandle {
 	handle := &expandHandle{
 		node: node,
 	}

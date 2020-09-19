@@ -4,7 +4,6 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
-	"github.com/drognisep/fynetree/model"
 	"testing"
 )
 
@@ -22,7 +21,7 @@ func TestNewExpandHandle(t *testing.T) {
 	testApp := test.NewApp()
 	win := testApp.NewWindow("Some Window")
 
-	node := model.NewTreeNode(&expandHandleModel{})
+	node := NewTreeNode(&expandHandleModel{})
 	node.SetBranch()
 	node.Expand()
 	handle := NewExpandHandle(node)
@@ -48,7 +47,7 @@ func TestNewExpandHandleHiddenWhenLeaf(t *testing.T) {
 	testApp := test.NewApp()
 	win := testApp.NewWindow("Some Window")
 
-	node := model.NewTreeNode(&expandHandleModel{})
+	node := NewTreeNode(&expandHandleModel{})
 	node.SetLeaf()
 	handle := NewExpandHandle(node)
 

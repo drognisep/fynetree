@@ -1,33 +1,71 @@
-package model
+package fynetree
 
 import (
 	"fmt"
+	"fyne.io/fyne/test"
+	"github.com/drognisep/fynetree/model"
 	"testing"
 )
 
-var rootModel TreeNodeModel
 var rootNode *TreeNode
-var modelA TreeNodeModel
-var modelB TreeNodeModel
-var modelC TreeNodeModel
-var modelD TreeNodeModel
+var modelA model.TreeNodeModel
+var modelB model.TreeNodeModel
+var modelC model.TreeNodeModel
+var modelD model.TreeNodeModel
 var nodeA *TreeNode
 var nodeB *TreeNode
 var nodeC *TreeNode
 var nodeD *TreeNode
 
 func setup() {
-	rootModel = NewStaticModel(nil, "root")
-	rootNode = NewTreeNode(rootModel)
-
-	modelA = NewStaticModel(nil, "A")
-	modelB = NewStaticModel(nil, "B")
-	modelC = NewStaticModel(nil, "C")
-	modelD = NewStaticModel(nil, "D")
+	rootNode = NewTreeNode(model.NewStaticModel(nil, "root"))
+	rootNode.SetBranch()
+	modelA = model.NewStaticModel(nil, "A")
+	modelB = model.NewStaticModel(nil, "B")
+	modelC = model.NewStaticModel(nil, "C")
+	modelD = model.NewStaticModel(nil, "D")
 	nodeA = NewTreeNode(modelA)
 	nodeB = NewTreeNode(modelB)
 	nodeC = NewTreeNode(modelC)
+	nodeC.SetBranch()
 	nodeD = NewTreeNode(modelD)
+}
+
+func TestNewTreeEntry(t *testing.T) {
+	setup()
+
+	_ = rootNode.Append(nodeA)
+	_ = rootNode.Append(nodeB)
+	_ = rootNode.Append(nodeC)
+	nodeC.OnBeforeExpand(func() {
+		if len(nodeC.GetChildren()) == 0 {
+			_ = nodeC.Append(nodeD)
+		}
+	})
+
+	testApp := test.NewApp()
+	win := testApp.NewWindow("Testing")
+	win.SetContent(rootNode)
+
+	win.ShowAndRun()
+
+	if rootNode.Hidden {
+		t.Errorf("Root rootEntry should not be hidden")
+	}
+	if nodeA.Visible() {
+		t.Errorf("Node A should not be visible yet")
+	}
+
+	rootNode.Expand()
+	if !nodeA.Visible() {
+		t.Errorf("Node A is not visible after expanding the root node")
+	}
+
+	fmt.Println("Appended Node D to Node C")
+	nodeC.Expand()
+	if !nodeD.Visible() {
+		t.Errorf("Node D should be visible after expanding")
+	}
 }
 
 func TestTreeNode_Append(t *testing.T) {
