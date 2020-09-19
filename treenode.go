@@ -20,7 +20,7 @@ type TreeNode struct {
 
 	mux      sync.Mutex
 	parent   *TreeNode
-	children []*TreeNode
+	children []fyne.CanvasObject
 }
 
 // NewTreeNode constructs a tree node with the given model.
@@ -49,7 +49,7 @@ func (n *TreeNode) GetParent() *TreeNode {
 }
 
 // GetChildren gets the children in this node.
-func (n *TreeNode) GetChildren() []*TreeNode {
+func (n *TreeNode) GetChildren() []fyne.CanvasObject {
 	n.mux.Lock()
 	defer n.mux.Unlock()
 	children := n.children
@@ -161,7 +161,7 @@ func (n *TreeNode) InsertAt(position int, node *TreeNode) error {
 			return err
 		} else if position == 0 {
 			node.Show()
-			n.children = append([]*TreeNode{node}, n.children...)
+			n.children = append([]fyne.CanvasObject{node}, n.children...)
 		} else if position > 0 && position < childrenLen {
 			node.Show()
 			n.children = append(n.children, nil)
@@ -199,7 +199,7 @@ func (n *TreeNode) Append(node *TreeNode) error {
 }
 
 // Remove the child node at the given position and return it. An error is returned if the index is invalid or the node is not found.
-func (n *TreeNode) RemoveAt(position int) (removedNode *TreeNode, err error) {
+func (n *TreeNode) RemoveAt(position int) (removedNode fyne.CanvasObject, err error) {
 	n.mux.Lock()
 	removedNode, err = n.removeAtImpl(position)
 	n.mux.Unlock()
@@ -207,7 +207,7 @@ func (n *TreeNode) RemoveAt(position int) (removedNode *TreeNode, err error) {
 	return
 }
 
-func (n *TreeNode) removeAtImpl(position int) (removedNode *TreeNode, err error) {
+func (n *TreeNode) removeAtImpl(position int) (removedNode fyne.CanvasObject, err error) {
 	childrenLen := len(n.children)
 	if position == 0 {
 		removedNode = n.children[position]
@@ -222,12 +222,14 @@ func (n *TreeNode) removeAtImpl(position int) (removedNode *TreeNode, err error)
 		err = fmt.Errorf("position %d is out of bounds for %d length children", position, childrenLen)
 		return
 	}
-	removedNode.parent = nil
+	if treeNode, ok := (removedNode).(*TreeNode); ok {
+		treeNode.parent = nil
+	}
 	return
 }
 
 // Remove searches for the given node to remove and return it if it exists, returns nil and an error otherwise.
-func (n *TreeNode) Remove(node *TreeNode) (removedNode *TreeNode, err error) {
+func (n *TreeNode) Remove(node *TreeNode) (removedNode fyne.CanvasObject, err error) {
 	n.mux.Lock()
 	if node != nil {
 		for i, existing := range n.children {
@@ -252,7 +254,9 @@ func (n *TreeNode) RemoveAll() {
 	numChildren := len(n.children)
 	for i := 0; i < numChildren; i++ {
 		node, _ := n.removeAtImpl(0)
-		node.RemoveAll()
+		if treeNode, ok := (node).(*TreeNode); ok {
+			treeNode.RemoveAll()
+		}
 	}
 	n.mux.Unlock()
 	n.Refresh()
