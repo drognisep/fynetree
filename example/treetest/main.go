@@ -17,6 +17,7 @@ func main() {
 	win := myApp.NewWindow("Testing widget")
 	win.Resize(fyne.NewSize(640, 480))
 
+	treeContainer := fynetree.NewTreeContainer()
 	rootNode := fynetree.NewTreeNode(model.NewStaticModel(theme.FolderOpenIcon(), "Tasks"))
 	exampleTask := &example.Task{
 		Summary:     "Hello!",
@@ -25,13 +26,12 @@ func main() {
 	exampleNode := fynetree.NewTreeNode(exampleTask)
 	exampleNode.SetLeaf()
 	_ = rootNode.Append(exampleNode)
-	treeContainer := widget.NewVBox(rootNode)
-	scrollContainer := widget.NewScrollContainer(treeContainer)
+	_ = treeContainer.Append(rootNode)
 
 	addBtn := widget.NewButton("Add Task", addBtnClicked(rootNode, win))
 	btnBox := widget.NewVBox(addBtn)
 
-	split := widget.NewHSplitContainer(scrollContainer, fyne.NewContainerWithLayout(
+	split := widget.NewHSplitContainer(treeContainer, fyne.NewContainerWithLayout(
 		layout.NewBorderLayout(nil, btnBox, nil, nil),
 		btnBox,
 		example.NewDetailView(exampleTask),
