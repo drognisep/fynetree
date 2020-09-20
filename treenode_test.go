@@ -2,62 +2,69 @@ package fynetree
 
 import (
 	"fmt"
-	"fyne.io/fyne"
+	"fyne.io/fyne/test"
+	"github.com/drognisep/fynetree/model"
 	"testing"
 )
 
-type mockModel struct {
-	changeListeners []ModelChangeListener
-	text            string
-	leaf            bool
-}
-
-func (m mockModel) GetIconResource() *fyne.Resource {
-	return nil
-}
-
-func (m mockModel) GetText() string {
-	return m.text
-}
-
-func (m mockModel) AddChangeListener(listener ModelChangeListener) {
-	m.changeListeners = append(m.changeListeners, listener)
-}
-
-func (m mockModel) BeforeExpand() {}
-
-func (m mockModel) AfterCondense() {}
-
-func (m mockModel) IsLeaf() bool {
-	return m.leaf
-}
-
-var rootModel TreeNodeModel
 var rootNode *TreeNode
-var modelA mockModel
-var modelB mockModel
-var modelC mockModel
-var modelD mockModel
+var modelA model.TreeNodeModel
+var modelB model.TreeNodeModel
+var modelC model.TreeNodeModel
+var modelD model.TreeNodeModel
 var nodeA *TreeNode
 var nodeB *TreeNode
 var nodeC *TreeNode
 var nodeD *TreeNode
 
 func setup() {
-	rootModel = mockModel{text: "root"}
-	rootNode = NewTreeNode(rootModel)
-
-	modelA = mockModel{text: "A"}
-	modelB = mockModel{text: "B"}
-	modelC = mockModel{text: "C"}
-	modelD = mockModel{text: "D"}
+	rootNode = NewTreeNode(model.NewStaticModel(nil, "root"))
+	rootNode.SetBranch()
+	modelA = model.NewStaticModel(nil, "A")
+	modelB = model.NewStaticModel(nil, "B")
+	modelC = model.NewStaticModel(nil, "C")
+	modelD = model.NewStaticModel(nil, "D")
 	nodeA = NewTreeNode(modelA)
 	nodeB = NewTreeNode(modelB)
 	nodeC = NewTreeNode(modelC)
+	nodeC.SetBranch()
 	nodeD = NewTreeNode(modelD)
+}
 
-	for _, m := range []mockModel{modelA, modelB, modelC, modelD} {
-		m.leaf = true
+func TestNewTreeEntry(t *testing.T) {
+	setup()
+
+	_ = rootNode.Append(nodeA)
+	_ = rootNode.Append(nodeB)
+	_ = rootNode.Append(nodeC)
+	nodeC.OnBeforeExpand(func() {
+		if len(nodeC.GetChildren()) == 0 {
+			_ = nodeC.Append(nodeD)
+		}
+	})
+
+	testApp := test.NewApp()
+	win := testApp.NewWindow("Testing")
+	win.SetContent(rootNode)
+
+	win.ShowAndRun()
+
+	if rootNode.Hidden {
+		t.Errorf("Root rootEntry should not be hidden")
+	}
+	if nodeA.Visible() {
+		t.Errorf("Node A should not be visible yet")
+	}
+
+	rootNode.Expand()
+	if !nodeA.Visible() {
+		t.Errorf("Node A is not visible after expanding the root node")
+	}
+
+	fmt.Println("Appended Node D to Node C")
+	nodeC.Expand()
+	if !nodeD.Visible() {
+		t.Errorf("Node D should be visible after expanding")
 	}
 }
 
@@ -216,5 +223,29 @@ func TestTreeNode_Remove(t *testing.T) {
 
 	if want, got := 0, len(rootNode.children); want != got {
 		t.Errorf("Not all nodes were removed")
+	}
+}
+
+func TestTreeNode_RemoveAll(t *testing.T) {
+	setup()
+	nodes := []*TreeNode{nodeA, nodeB, nodeC}
+	for _, n := range nodes {
+		err := rootNode.Append(n)
+		if err != nil {
+			t.Errorf("Expected Append error to be nil: %v", err)
+		}
+	}
+	err := nodeC.Append(nodeD)
+	if err != nil {
+		t.Errorf("Expected Append error to be nil: %v", err)
+	}
+
+	rootNode.RemoveAll()
+	if got, want := len(rootNode.children), 0; got != want {
+		t.Errorf("Root node should be empty, has %d children", got)
+	}
+
+	if got, want := len(nodeC.children), 0; got != want {
+		t.Errorf("Node C should be empty, has %d children", got)
 	}
 }
