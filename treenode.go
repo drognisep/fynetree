@@ -26,12 +26,12 @@ type TreeNode struct {
 // NewTreeNode constructs a tree node with the given model.
 func NewTreeNode(model model.TreeNodeModel) *TreeNode {
 	newNode := &TreeNode{}
-	InitTreeNode(model, newNode)
+	InitTreeNode(newNode, model)
 	return newNode
 }
 
 // InitTreeNode initializes a tree node.
-func InitTreeNode(model model.TreeNodeModel, newNode *TreeNode) {
+func InitTreeNode(newNode *TreeNode, model model.TreeNodeModel) {
 	newNode.model = model
 	newNode.beforeExpand = func() {}
 	newNode.afterCondense = func() {}
@@ -48,12 +48,11 @@ func (n *TreeNode) GetParent() *TreeNode {
 	return n.parent
 }
 
-// GetChildren gets the children in this node.
-func (n *TreeNode) GetChildren() []fyne.CanvasObject {
+// NumChildren returns how many child nodes this node has.
+func (n *TreeNode) NumChildren() int {
 	n.mux.Lock()
 	defer n.mux.Unlock()
-	children := n.children
-	return children
+	return len(n.children)
 }
 
 // GetModelIconResource gets the icon for this node.
@@ -103,7 +102,7 @@ func (n *TreeNode) IsExpanded() bool {
 	return n.expanded
 }
 
-// IsCondensed returns whether this node is collapsed.
+// IsCondensed returns whether this node is condensed down and child nodes are not shown.
 func (n *TreeNode) IsCondensed() bool {
 	return !n.expanded
 }
@@ -134,7 +133,6 @@ func (n *TreeNode) Condense() {
 	n.Refresh()
 }
 
-// Don't need this
 func (n *TreeNode) hideChildren() {
 	for _, c := range n.children {
 		c.Hide()

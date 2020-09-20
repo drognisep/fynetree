@@ -88,9 +88,7 @@ func (renderer treeEntryRenderer) entryItemsMinSize() fyne.Size {
 	handleSize := renderer.handle.MinSize()
 	iconSize := renderer.icon.MinSize()
 	labelSize := renderer.label.MinSize()
-	entryItemsSize := fyne.NewSize(handleSize.Width+iconSize.Width+labelSize.Width,
-		util.IntMax(handleSize.Height, iconSize.Height, labelSize.Height))
-	return entryItemsSize
+	return util.InlineMinSize(handleSize, iconSize, labelSize)
 }
 
 func (renderer treeEntryRenderer) Refresh() {

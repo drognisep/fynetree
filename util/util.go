@@ -12,7 +12,7 @@ func IntMax(ints ...int) int {
 	return max
 }
 
-func InlineMaxSize(sizes ...fyne.Size) fyne.Size {
+func InlineMinSize(sizes ...fyne.Size) fyne.Size {
 	var runningWidth int
 	var maxHeight int
 	for _, size := range sizes {
@@ -25,7 +25,7 @@ func InlineMaxSize(sizes ...fyne.Size) fyne.Size {
 	}
 }
 
-func ColumnMaxSize(sizes ...fyne.Size) fyne.Size {
+func ColumnMinSize(sizes ...fyne.Size) fyne.Size {
 	var maxWidth int
 	var runningHeight int
 	for _, size := range sizes {

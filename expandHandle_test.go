@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-type expandHandleModel struct {}
+type expandHandleModel struct{}
 
 func (e *expandHandleModel) GetIconResource() fyne.Resource {
 	return nil
@@ -39,7 +39,7 @@ func TestNewExpandHandle(t *testing.T) {
 
 	test.Tap(handle)
 	if node.IsExpanded() == true {
-		t.Errorf("Expected node to now be collapsed")
+		t.Errorf("Expected node to now be condensed")
 	}
 }
 

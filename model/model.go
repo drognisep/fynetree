@@ -6,33 +6,33 @@ import (
 
 // TreeNodeModel is the interface to user defined data.
 type TreeNodeModel interface {
-	// GetIconResource should return the user defined icon resource to show in the view, or nil if no icon is needed.
+	// GetIconResource should return the user defined icon Resource to show in the view, or nil if no icon is needed.
 	GetIconResource() fyne.Resource
 
-	// GetText should return the user defined text to display for this node in the view, or "" if no text is needed.
+	// GetText should return the user defined Text to display for this node in the view, or "" if no Text is needed.
 	GetText() string
 }
 
-var _ TreeNodeModel = (*staticNodeModel)(nil)
+var _ TreeNodeModel = (*StaticNodeModel)(nil)
 
-type staticNodeModel struct {
-	resource fyne.Resource
-	text     string
+type StaticNodeModel struct {
+	Resource fyne.Resource
+	Text     string
 }
 
-func (s *staticNodeModel) GetIconResource() fyne.Resource {
-	return s.resource
+func (s *StaticNodeModel) GetIconResource() fyne.Resource {
+	return s.Resource
 }
 
-func (s *staticNodeModel) GetText() string {
-	return s.text
+func (s *StaticNodeModel) GetText() string {
+	return s.Text
 }
 
 // NewStaticModel creates a TreeNodeModel with fixed values that never change.
 func NewStaticModel(resource fyne.Resource, text string) TreeNodeModel {
-	return &staticNodeModel{
-		resource: resource,
-		text:     text,
+	return &StaticNodeModel{
+		Resource: resource,
+		Text:     text,
 	}
 }
 

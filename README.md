@@ -10,6 +10,7 @@ Which really helped me understand what's going on under the covers more too. :)
 ## Task list
 - [x] ~~Create base tree node widget with custom layout and dynamic event handling~~
 - [ ] Create tree node container
+- [ ] Provide InsertSorted method
 - [ ] Provide icon and text tap event hooks
 - [ ] Try out some selection model ideas
 - [ ] Handle custom secondary tap menu and logic
@@ -48,7 +49,22 @@ argument.
 
 ```golang
 // NewStaticModel creates a TreeNodeModel with fixed values that never change.
-func NewStaticModel(resource fyne.Resource, text string) TreeNodeModel
+func NewStaticModel(resource fyne.Resource, text string) TreeNodeModel {
+	return &StaticNodeModel{
+		Resource: resource,
+		Text:     text,
+	}
+}
+```
+
+Of course, the static model type is also exposed in case there's a need to create or extend it
+directly.
+
+```golang
+type StaticNodeModel struct {
+	Resource fyne.Resource
+	Text     string
+}
 ```
 
 ### ViewModel and View
@@ -85,23 +101,20 @@ Root tree nodes can be simply wrapped in a `NewVBox` to present the view one wou
 plan on creating a tree node container to make this more straight forward.
 
 ```golang
-// This is an excerpt from the example app. Clone the project to try it out.
+    // This is an excerpt from the example app. Clone the project to try it out.
 
-/* ... */
-rootNode := fynetree.NewTreeNode(model.NewStaticModel(theme.FolderOpenIcon(), "Tasks"))
-
-// This implements model.TreeNodeModel
-exampleTask := &Task{
-    Summary:     "Hello!",
-    Description: "This is an example Task",
-}
-
-exampleNode := fynetree.NewTreeNode(exampleTask)
-exampleNode.SetLeaf() // Branches by default
-_ = rootNode.Append(exampleNode)
-treeContainer := widget.NewVBox(rootNode)
-scrollContainer := widget.NewScrollContainer(treeContainer)
-/* ... */
+    /* ... */
+    rootNode := fynetree.NewTreeNode(model.NewStaticModel(theme.FolderOpenIcon(), "Tasks"))
+    exampleTask := &example.Task{
+        Summary:     "Hello!",
+        Description: "This is an example Task",
+    }
+    exampleNode := fynetree.NewTreeNode(exampleTask)
+    exampleNode.SetLeaf()
+    _ = rootNode.Append(exampleNode)
+    treeContainer := widget.NewVBox(rootNode)
+    scrollContainer := widget.NewScrollContainer(treeContainer)
+    /* ... */
 ```
 
 Nodes can be dynamically added/inserted/removed from any other node, nodes can be

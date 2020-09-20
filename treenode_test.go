@@ -38,7 +38,7 @@ func TestNewTreeEntry(t *testing.T) {
 	_ = rootNode.Append(nodeB)
 	_ = rootNode.Append(nodeC)
 	nodeC.OnBeforeExpand(func() {
-		if len(nodeC.GetChildren()) == 0 {
+		if nodeC.NumChildren() == 0 {
 			_ = nodeC.Append(nodeD)
 		}
 	})
