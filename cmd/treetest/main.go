@@ -4,6 +4,8 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/dialog"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/drognisep/fynetree"
@@ -25,11 +27,50 @@ func main() {
 	exampleNode := fynetree.NewTreeNode(exampleTask)
 	exampleNode.SetLeaf()
 	_ = rootNode.Append(exampleNode)
-	_ = rootNode.Append(fynetree.NewTreeNode(model.NewStaticModel(nil, "Some other task")))
 	treeContainer := widget.NewVBox(rootNode)
 	scrollContainer := widget.NewScrollContainer(treeContainer)
-	split := widget.NewHSplitContainer(scrollContainer, NewDetailView(exampleTask))
+
+	addBtnClicked := func() {
+		var summary string
+		var desc string
+
+		callback := func(accepted bool) {
+			if accepted {
+				taskNode := NewTaskNode(summary, desc)
+				_ = rootNode.Append(taskNode)
+				taskNode.Expand()
+				subTask := fynetree.NewTreeNode(model.NewStaticModel(theme.CheckButtonIcon(), "Do this"))
+				subTask.SetLeaf()
+				_ = taskNode.Append(subTask)
+			}
+		}
+
+		summaryEntry := widget.NewEntry()
+		summaryEntry.OnChanged = func(newSummary string) {
+			summary = newSummary
+		}
+		descEntry := widget.NewMultiLineEntry()
+		descEntry.OnChanged = func(newDesc string) {
+			desc = newDesc
+		}
+		dialog.NewCustomConfirm("Add Task", "Add", "Cancel", fyne.NewContainerWithLayout(
+			layout.NewFormLayout(),
+			widget.NewLabel("Summary"),
+			summaryEntry,
+			widget.NewLabel("Description"),
+			descEntry,
+		), callback, win)
+	}
+	addBtn := widget.NewButton("Add Task", addBtnClicked)
+	btnBox := widget.NewVBox(addBtn)
+
+	split := widget.NewHSplitContainer(scrollContainer, fyne.NewContainerWithLayout(
+		layout.NewBorderLayout(nil, btnBox, nil, nil),
+		btnBox,
+		NewDetailView(exampleTask),
+	))
 	split.SetOffset(0.3)
+
 	win.SetContent(split)
 	win.ShowAndRun()
 }
@@ -41,8 +82,17 @@ type Task struct {
 	Description string
 }
 
+func NewTaskNode(summary, description string) *fynetree.TreeNode {
+	task := &Task{
+		Summary:     summary,
+		Description: description,
+	}
+	node := fynetree.NewTreeNode(task)
+	return node
+}
+
 func (t *Task) GetIconResource() fyne.Resource {
-	return theme.ConfirmIcon()
+	return theme.CheckButtonCheckedIcon()
 }
 
 func (t *Task) GetText() string {
@@ -79,9 +129,9 @@ type detailViewRenderer struct {
 func newDetailViewRenderer(view *DetailView) *detailViewRenderer {
 	defaultTextSize := float64(fyne.CurrentApp().Settings().Theme().TextSize())
 	summary := &canvas.Text{
-		Color:     theme.TextColor(),
-		Text:      view.Task.Summary,
-		TextSize:  int(defaultTextSize * 1.5),
+		Color:    theme.TextColor(),
+		Text:     view.Task.Summary,
+		TextSize: int(defaultTextSize * 1.5),
 		TextStyle: fyne.TextStyle{
 			Bold: true,
 		},
@@ -105,7 +155,7 @@ func (d *detailViewRenderer) Layout(container fyne.Size) {
 	d.summary.Resize(fyne.NewSize(container.Width, summarySize.Height))
 
 	descSize := d.description.MinSize()
-	d.description.Move(fyne.NewPos(spacer.Width, summarySize.Height + spacer.Height))
+	d.description.Move(fyne.NewPos(spacer.Width, summarySize.Height+spacer.Height))
 	d.description.Resize(fyne.NewSize(container.Width, descSize.Height))
 }
 
