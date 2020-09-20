@@ -3,6 +3,7 @@ package fynetree
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/widget"
+	"github.com/drognisep/fynetree/util"
 	"image/color"
 )
 
@@ -48,16 +49,12 @@ func (renderer treeEntryRenderer) Layout(container fyne.Size) {
 		iconWidth = 0
 	}
 	label := renderer.label
-	var labelWidth int
 	if label.Text != "" {
-		labelWidth = container.Width - handleWidth - iconWidth
 		label.Move(fyne.NewPos(handleWidth+iconWidth, 0))
-		label.Resize(fyne.NewSize(labelWidth, itemsHeight))
-	} else {
-		labelWidth = 0
+		label.Resize(fyne.NewSize(label.MinSize().Width, itemsHeight))
 	}
 	if node.IsBranch() && node.IsExpanded() {
-		var runningY int = itemsHeight
+		var runningY = itemsHeight
 		for _, c := range node.children {
 			cSize := c.MinSize()
 			c.Move(fyne.NewPos(HierarchyPadding, runningY))
@@ -79,12 +76,12 @@ func (renderer treeEntryRenderer) MinSize() fyne.Size {
 		if c.Visible() {
 			childSize := c.MinSize()
 			childrenSize = fyne.Size{
-				Width:  intMax(childrenSize.Width, childSize.Width),
+				Width:  util.IntMax(childrenSize.Width, childSize.Width),
 				Height: childrenSize.Height + childSize.Height,
 			}
 		}
 	}
-	return fyne.NewSize(intMax(entryItemsSize.Width, childrenSize.Width+HierarchyPadding), entryItemsSize.Height+childrenSize.Height)
+	return fyne.NewSize(util.IntMax(entryItemsSize.Width, childrenSize.Width+HierarchyPadding), entryItemsSize.Height+childrenSize.Height)
 }
 
 func (renderer treeEntryRenderer) entryItemsMinSize() fyne.Size {
@@ -92,7 +89,7 @@ func (renderer treeEntryRenderer) entryItemsMinSize() fyne.Size {
 	iconSize := renderer.icon.MinSize()
 	labelSize := renderer.label.MinSize()
 	entryItemsSize := fyne.NewSize(handleSize.Width+iconSize.Width+labelSize.Width,
-		intMax(handleSize.Height, iconSize.Height, labelSize.Height))
+		util.IntMax(handleSize.Height, iconSize.Height, labelSize.Height))
 	return entryItemsSize
 }
 
