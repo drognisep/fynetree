@@ -77,6 +77,7 @@ func (n *TreeNode) IsBranch() bool {
 
 // SetLeaf sets this node to a leaf node.
 func (n *TreeNode) SetLeaf() {
+	n.Condense()
 	n.leaf = true
 	n.Refresh()
 }
@@ -107,14 +108,14 @@ func (n *TreeNode) IsCondensed() bool {
 	return !n.expanded
 }
 
-// Expand expands the node and triggers the BeforeExpand hook in the model if it's not already expanded.
+// Expand expands the node and triggers the BeforeExpand hook in the model if it's a branch and not already expanded.
 func (n *TreeNode) Expand() {
-	if !n.expanded {
+	if n.IsBranch() && n.IsCondensed() {
 		n.beforeExpand()
 		n.showChildren()
 		n.expanded = true
+		n.Refresh()
 	}
-	n.Refresh()
 }
 
 func (n *TreeNode) showChildren() {
@@ -123,14 +124,14 @@ func (n *TreeNode) showChildren() {
 	}
 }
 
-// Condense condenses the node and triggers the AfterCondense hook in the model if it's not already condensed.
+// Condense condenses the node and triggers the AfterCondense hook in the model if it's a branch and not already condensed.
 func (n *TreeNode) Condense() {
-	if n.expanded {
+	if n.IsBranch() && n.IsExpanded() {
 		n.expanded = false
 		n.hideChildren()
 		n.afterCondense()
+		n.Refresh()
 	}
-	n.Refresh()
 }
 
 func (n *TreeNode) hideChildren() {
