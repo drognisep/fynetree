@@ -50,7 +50,7 @@ func addBtnClicked(rootNode *fynetree.TreeNode, window fyne.Window) func() {
 		callback := func(accepted bool) {
 			if accepted {
 				taskNode := example.NewTaskNode(summary, desc)
-				_ = rootNode.Append(taskNode)
+				_ = rootNode.InsertSorted(taskNode)
 				taskNode.Expand()
 				subTask := fynetree.NewTreeNode(model.NewStaticModel(theme.CheckButtonIcon(), "Do this"))
 				subTask.SetLeaf()

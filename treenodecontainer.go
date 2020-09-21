@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/widget"
 	"image/color"
+	"strings"
 	"sync"
 )
 
@@ -64,6 +65,22 @@ func (t *TreeContainer) InsertAt(position int, node *TreeNode) error {
 	}
 	t.mux.Unlock()
 	return errors.New("unable to insert nil node")
+}
+
+// InsertSorted inserts a root node sorted by label.
+func (t *TreeContainer) InsertSorted(node *TreeNode) error {
+	t.mux.Lock()
+	roots := t.roots
+	for i, c := range roots {
+		if treeNode, ok := c.(*TreeNode); ok {
+			if strings.ToUpper(node.GetModelText()) <= strings.ToUpper(treeNode.GetModelText()) {
+				t.mux.Unlock()
+				return t.InsertAt(i, node)
+			}
+		}
+	}
+	t.mux.Unlock()
+	return t.Append(node)
 }
 
 // Append adds a node to the end of the list.

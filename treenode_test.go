@@ -66,6 +66,8 @@ func TestNewTreeEntry(t *testing.T) {
 	if !nodeD.Visible() {
 		t.Errorf("Node D should be visible after expanding")
 	}
+
+	win.Close()
 }
 
 func TestTreeNode_Append(t *testing.T) {
@@ -188,6 +190,42 @@ func TestTreeNode_InsertAt(t *testing.T) {
 	err = rootNode.InsertAt(0, nil)
 	if err == nil {
 		t.Errorf("Should have returned an error for index out of bounds")
+	}
+}
+
+func TestTreeNode_InsertSorted(t *testing.T) {
+	root := NewTreeNode(model.NewStaticModel(nil, "root"))
+	a := NewTreeNode(model.NewStaticModel(nil, "A"))
+	b := NewTreeNode(model.NewStaticModel(nil, "B"))
+	c := NewTreeNode(model.NewStaticModel(nil, "c"))
+	d := NewTreeNode(model.NewStaticModel(nil, "D"))
+	empty := NewTreeNode(model.NewStaticModel(nil, ""))
+
+	if childLen := root.NumChildren(); childLen != 0 {
+		t.Errorf("Root node should be empty")
+	}
+
+	_ = root.InsertSorted(b)
+	_ = root.InsertSorted(a)
+	_ = root.InsertSorted(d)
+	_ = root.InsertSorted(c)
+	_ = root.InsertSorted(empty)
+
+	children := root.children
+	if children[0] != empty {
+		t.Errorf("First node should be empty")
+	}
+	if children[1] != a {
+		t.Errorf("Second node should be A")
+	}
+	if children[2] != b {
+		t.Errorf("Third node should be B")
+	}
+	if children[3] != c {
+		t.Errorf("Fourth node should be C")
+	}
+	if children[4] != d {
+		t.Errorf("Fifth node should be D")
 	}
 }
 

@@ -4,9 +4,13 @@ import "fyne.io/fyne"
 
 func IntMax(ints ...int) int {
 	var max int
-	for _, i := range ints {
-		if i > max {
-			max = i
+	for i, num := range ints {
+		if i == 0 {
+			max = num
+			continue
+		}
+		if num > max {
+			max = num
 		}
 	}
 	return max
