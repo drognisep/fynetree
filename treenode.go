@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/widget"
 	"github.com/drognisep/fynetree/model"
+	"strings"
 	"sync"
 )
 
@@ -177,6 +178,21 @@ func (n *TreeNode) InsertAt(position int, node *TreeNode) error {
 	}
 	n.mux.Unlock()
 	return errors.New("unable to insert nil node")
+}
+
+func (n *TreeNode) InsertSorted(node *TreeNode) error {
+	n.mux.Lock()
+	children := n.children
+	for i, c := range children {
+		if treeNode, ok := c.(*TreeNode); ok {
+			if strings.ToUpper(node.GetModelText()) <= strings.ToUpper(treeNode.GetModelText()) {
+				n.mux.Unlock()
+				return n.InsertAt(i, node)
+			}
+		}
+	}
+	n.mux.Unlock()
+	return n.Append(node)
 }
 
 // Append adds a node to the end of the list.

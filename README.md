@@ -10,7 +10,7 @@ Which really helped me understand what's going on under the covers more too. :)
 ## Task list
 - [x] ~~Create base tree node widget with custom layout and dynamic event handling~~
 - [x] ~~Create tree node container~~
-- [ ] Provide InsertSorted method
+- [x] ~~Provide InsertSorted method~~
 - [ ] Provide icon and text tap event hooks
 - [ ] Try out some selection model ideas
 - [ ] Handle custom secondary tap menu and logic
