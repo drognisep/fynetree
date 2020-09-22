@@ -111,7 +111,7 @@ enough to add to most any consumer view without compromising layout expectations
 
 /* ... */
 treeContainer := fynetree.NewTreeContainer()
-rootNode := fynetree.NewStaticBoundModel(theme.FolderOpenIcon(), "Tasks")
+rootModel := fynetree.NewStaticBoundModel(theme.FolderOpenIcon(), "Tasks")
 exampleTask := &example.Task{
     Summary:     "Hello!",
     Description: "This is an example Task",
@@ -125,8 +125,8 @@ exampleNode.OnTappedSecondary = func(pe *fyne.PointEvent) {
     canvas := fyne.CurrentApp().Driver().CanvasForObject(exampleNode)
     widget.ShowPopUpMenuAtPosition(exampleTask.Menu, canvas, pe.AbsolutePosition)
 }
-_ = rootNode.Node.Append(exampleNode)
-_ = treeContainer.Append(rootNode.Node)
+_ = rootModel.Node.Append(exampleNode)
+_ = treeContainer.Append(rootModel.Node)
 /* ... */
 ```
 

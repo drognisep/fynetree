@@ -17,7 +17,7 @@ func main() {
 	win.Resize(fyne.NewSize(640, 480))
 
 	treeContainer := fynetree.NewTreeContainer()
-	rootNode := fynetree.NewStaticBoundModel(theme.FolderOpenIcon(), "Tasks")
+	rootModel := fynetree.NewStaticBoundModel(theme.FolderOpenIcon(), "Tasks")
 	exampleTask := &example.Task{
 		Summary:     "Hello!",
 		Description: "This is an example Task",
@@ -31,10 +31,10 @@ func main() {
 		canvas := fyne.CurrentApp().Driver().CanvasForObject(exampleNode)
 		widget.ShowPopUpMenuAtPosition(exampleTask.Menu, canvas, pe.AbsolutePosition)
 	}
-	_ = rootNode.Node.Append(exampleNode)
-	_ = treeContainer.Append(rootNode.Node)
+	_ = rootModel.Node.Append(exampleNode)
+	_ = treeContainer.Append(rootModel.Node)
 
-	addBtn := widget.NewButton("Add Task", addBtnClicked(rootNode.Node, win))
+	addBtn := widget.NewButton("Add Task", addBtnClicked(rootModel.Node, win))
 	btnBox := widget.NewVBox(addBtn)
 
 	split := widget.NewHSplitContainer(treeContainer, fyne.NewContainerWithLayout(
