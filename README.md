@@ -11,7 +11,7 @@ Which really helped me understand what's going on under the covers more too. :)
 - [x] ~~Create base tree node widget with custom layout and dynamic event handling~~
 - [x] ~~Create tree node container~~
 - [x] ~~Provide InsertSorted method~~
-- [ ] Handle custom secondary tap menu and logic
+- [x] ~~Handle custom secondary tap menu and logic~~
 - [ ] Provide icon and text tap event hooks
 - [ ] Try out some selection model ideas
 - [ ] Possibly create factory methods to create leaf/branch nodes instead of setting leaf
