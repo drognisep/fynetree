@@ -4,14 +4,19 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/theme"
 	"github.com/drognisep/fynetree"
-	"github.com/drognisep/fynetree/model"
 )
 
-var _ model.TreeNodeModel = (*Task)(nil)
+var _ fynetree.TreeNodeModel = (*Task)(nil)
 
 type Task struct {
 	Summary     string
 	Description string
+	Node        *fynetree.TreeNode
+	Menu        *fyne.Menu
+}
+
+func (t *Task) SetTreeNode(node *fynetree.TreeNode) {
+	t.Node = node
 }
 
 func NewTaskNode(summary, description string) *fynetree.TreeNode {

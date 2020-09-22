@@ -5,19 +5,22 @@ import (
 	"fmt"
 	"fyne.io/fyne"
 	"fyne.io/fyne/widget"
-	"github.com/drognisep/fynetree/model"
 	"strings"
 	"sync"
 )
 
+// NodeEventHandler is a handler function for node events triggered by the view.
+type NodeEventHandler func()
+
 // TreeNode holds a TreeNodeModel's position within the view.
 type TreeNode struct {
 	widget.BaseWidget
-	model         model.TreeNodeModel
-	expanded      bool
-	beforeExpand  model.NodeEventHandler
-	afterCondense model.NodeEventHandler
-	leaf          bool
+	model             TreeNodeModel
+	expanded          bool
+	leaf              bool
+	OnBeforeExpand    NodeEventHandler
+	OnAfterCondense   NodeEventHandler
+	OnTappedSecondary func(pe *fyne.PointEvent)
 
 	mux      sync.Mutex
 	parent   *TreeNode
@@ -25,19 +28,30 @@ type TreeNode struct {
 }
 
 // NewTreeNode constructs a tree node with the given model.
-func NewTreeNode(model model.TreeNodeModel) *TreeNode {
+func NewTreeNode(model TreeNodeModel) *TreeNode {
 	newNode := &TreeNode{}
 	InitTreeNode(newNode, model)
 	return newNode
 }
 
-// InitTreeNode initializes a tree node.
-func InitTreeNode(newNode *TreeNode, model model.TreeNodeModel) {
+// InitTreeNode initializes the given tree node with the given model. If newNode is nil, then a new one will be created.
+func InitTreeNode(newNode *TreeNode, model TreeNodeModel) {
+	if newNode == nil {
+		newNode = &TreeNode{}
+	}
 	newNode.model = model
-	newNode.beforeExpand = func() {}
-	newNode.afterCondense = func() {}
+	model.SetTreeNode(newNode)
+	newNode.OnBeforeExpand = func() {}
+	newNode.OnAfterCondense = func() {}
+	newNode.OnTappedSecondary = func(pe *fyne.PointEvent) {}
 	newNode.leaf = false
 	newNode.ExtendBaseWidget(newNode)
+}
+
+func (n *TreeNode) TappedSecondary(pe *fyne.PointEvent) {
+	if n.OnTappedSecondary != nil {
+		n.OnTappedSecondary(pe)
+	}
 }
 
 func (n *TreeNode) CreateRenderer() fyne.WidgetRenderer {
@@ -89,16 +103,6 @@ func (n *TreeNode) SetBranch() {
 	n.Refresh()
 }
 
-// OnBeforeExpand sets the model handler for before the node has been expanded.
-func (n *TreeNode) OnBeforeExpand(handler model.NodeEventHandler) {
-	n.beforeExpand = handler
-}
-
-// OnAfterCondense sets the model handler for after the node has been condensed.
-func (n *TreeNode) OnAfterCondense(handler model.NodeEventHandler) {
-	n.afterCondense = handler
-}
-
 // IsExpanded returns whether this node is expanded.
 func (n *TreeNode) IsExpanded() bool {
 	return n.expanded
@@ -109,10 +113,12 @@ func (n *TreeNode) IsCondensed() bool {
 	return !n.expanded
 }
 
-// Expand expands the node and triggers the BeforeExpand hook in the model if it's a branch and not already expanded.
+// Expand expands the node and triggers the OnBeforeExpand hook in the model if it's a branch and not already expanded.
 func (n *TreeNode) Expand() {
 	if n.IsBranch() && n.IsCondensed() {
-		n.beforeExpand()
+		if n.OnBeforeExpand != nil {
+			n.OnBeforeExpand()
+		}
 		n.showChildren()
 		n.expanded = true
 		n.Refresh()
@@ -130,7 +136,9 @@ func (n *TreeNode) Condense() {
 	if n.IsBranch() && n.IsExpanded() {
 		n.expanded = false
 		n.hideChildren()
-		n.afterCondense()
+		if n.OnAfterCondense != nil {
+			n.OnAfterCondense()
+		}
 		n.Refresh()
 	}
 }

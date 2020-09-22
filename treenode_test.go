@@ -3,27 +3,26 @@ package fynetree
 import (
 	"fmt"
 	"fyne.io/fyne/test"
-	"github.com/drognisep/fynetree/model"
 	"testing"
 )
 
 var rootNode *TreeNode
-var modelA model.TreeNodeModel
-var modelB model.TreeNodeModel
-var modelC model.TreeNodeModel
-var modelD model.TreeNodeModel
+var modelA TreeNodeModel
+var modelB TreeNodeModel
+var modelC TreeNodeModel
+var modelD TreeNodeModel
 var nodeA *TreeNode
 var nodeB *TreeNode
 var nodeC *TreeNode
 var nodeD *TreeNode
 
 func setup() {
-	rootNode = NewTreeNode(model.NewStaticModel(nil, "root"))
+	rootNode = NewTreeNode(NewStaticModel(nil, "root"))
 	rootNode.SetBranch()
-	modelA = model.NewStaticModel(nil, "A")
-	modelB = model.NewStaticModel(nil, "B")
-	modelC = model.NewStaticModel(nil, "C")
-	modelD = model.NewStaticModel(nil, "D")
+	modelA = NewStaticModel(nil, "A")
+	modelB = NewStaticModel(nil, "B")
+	modelC = NewStaticModel(nil, "C")
+	modelD = NewStaticModel(nil, "D")
 	nodeA = NewTreeNode(modelA)
 	nodeB = NewTreeNode(modelB)
 	nodeC = NewTreeNode(modelC)
@@ -37,11 +36,11 @@ func TestNewTreeEntry(t *testing.T) {
 	_ = rootNode.Append(nodeA)
 	_ = rootNode.Append(nodeB)
 	_ = rootNode.Append(nodeC)
-	nodeC.OnBeforeExpand(func() {
+	nodeC.OnBeforeExpand = func() {
 		if nodeC.NumChildren() == 0 {
 			_ = nodeC.Append(nodeD)
 		}
-	})
+	}
 
 	testApp := test.NewApp()
 	win := testApp.NewWindow("Testing")
@@ -194,12 +193,12 @@ func TestTreeNode_InsertAt(t *testing.T) {
 }
 
 func TestTreeNode_InsertSorted(t *testing.T) {
-	root := NewTreeNode(model.NewStaticModel(nil, "root"))
-	a := NewTreeNode(model.NewStaticModel(nil, "A"))
-	b := NewTreeNode(model.NewStaticModel(nil, "B"))
-	c := NewTreeNode(model.NewStaticModel(nil, "c"))
-	d := NewTreeNode(model.NewStaticModel(nil, "D"))
-	empty := NewTreeNode(model.NewStaticModel(nil, ""))
+	root := NewTreeNode(NewStaticModel(nil, "root"))
+	a := NewTreeNode(NewStaticModel(nil, "A"))
+	b := NewTreeNode(NewStaticModel(nil, "B"))
+	c := NewTreeNode(NewStaticModel(nil, "c"))
+	d := NewTreeNode(NewStaticModel(nil, "D"))
+	empty := NewTreeNode(NewStaticModel(nil, ""))
 
 	if childLen := root.NumChildren(); childLen != 0 {
 		t.Errorf("Root node should be empty")

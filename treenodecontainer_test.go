@@ -1,7 +1,6 @@
 package fynetree
 
 import (
-	"github.com/drognisep/fynetree/model"
 	"testing"
 )
 
@@ -13,10 +12,10 @@ var rootD *TreeNode
 
 func treeContainerTestSetup() {
 	treeContainer = NewTreeContainer()
-	rootA = NewTreeNode(model.NewStaticModel(nil, "A"))
-	rootB = NewTreeNode(model.NewStaticModel(nil, "B"))
-	rootC = NewTreeNode(model.NewStaticModel(nil, "C"))
-	rootD = NewTreeNode(model.NewStaticModel(nil, "D"))
+	rootA = NewTreeNode(NewStaticModel(nil, "A"))
+	rootB = NewTreeNode(NewStaticModel(nil, "B"))
+	rootC = NewTreeNode(NewStaticModel(nil, "C"))
+	rootD = NewTreeNode(NewStaticModel(nil, "D"))
 }
 
 func TestTreeNodeContainer_Append(t *testing.T) {
@@ -145,11 +144,11 @@ func TestTreeNodeContainer_InsertAt(t *testing.T) {
 
 func TestTreeNodeContainer_InsertSorted(t *testing.T) {
 	treeContainerTestSetup()
-	a := NewTreeNode(model.NewStaticModel(nil, "A"))
-	b := NewTreeNode(model.NewStaticModel(nil, "B"))
-	c := NewTreeNode(model.NewStaticModel(nil, "c"))
-	d := NewTreeNode(model.NewStaticModel(nil, "D"))
-	empty := NewTreeNode(model.NewStaticModel(nil, ""))
+	a := NewTreeNode(NewStaticModel(nil, "A"))
+	b := NewTreeNode(NewStaticModel(nil, "B"))
+	c := NewTreeNode(NewStaticModel(nil, "c"))
+	d := NewTreeNode(NewStaticModel(nil, "D"))
+	empty := NewTreeNode(NewStaticModel(nil, ""))
 	insertOrder := []*TreeNode{b, a, d, c, empty}
 
 	if childLen := treeContainer.NumRoots(); childLen != 0 {

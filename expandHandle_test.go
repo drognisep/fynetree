@@ -9,6 +9,9 @@ import (
 
 type expandHandleModel struct{}
 
+func (e *expandHandleModel) SetTreeNode(node *TreeNode) {
+}
+
 func (e *expandHandleModel) GetIconResource() fyne.Resource {
 	return nil
 }
