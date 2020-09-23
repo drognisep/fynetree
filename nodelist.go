@@ -1,15 +1,14 @@
-package data
+package fynetree
 
 import (
 	"errors"
 	"fmt"
 	"fyne.io/fyne"
-	"github.com/drognisep/fynetree"
 	"strings"
 	"sync"
 )
 
-type nodeList struct {
+type NodeList struct {
 	OnAfterAddition func(item fyne.CanvasObject)
 	OnAfterRemoval  func(item fyne.CanvasObject)
 
@@ -17,12 +16,12 @@ type nodeList struct {
 	Objects []fyne.CanvasObject
 }
 
-func (n *nodeList) Len() int {
+func (n *NodeList) Len() int {
 	return len(n.Objects)
 }
 
 // InsertAt a new TreeNode at the given position as a child of this Objects.
-func (n *nodeList) InsertAt(position int, node *fynetree.TreeNode) error {
+func (n *NodeList) InsertAt(position int, node *TreeNode) error {
 	n.mux.Lock()
 	if node != nil {
 		childrenLen := n.Len()
@@ -51,11 +50,11 @@ func (n *nodeList) InsertAt(position int, node *fynetree.TreeNode) error {
 	return errors.New("unable to insert nil node")
 }
 
-func (n *nodeList) InsertSorted(node *fynetree.TreeNode) error {
+func (n *NodeList) InsertSorted(node *TreeNode) error {
 	n.mux.Lock()
 	nodes := n.Objects
 	for i, c := range nodes {
-		if treeNode, ok := c.(*fynetree.TreeNode); ok {
+		if treeNode, ok := c.(*TreeNode); ok {
 			if strings.ToUpper(node.GetModelText()) <= strings.ToUpper(treeNode.GetModelText()) {
 				n.mux.Unlock()
 				return n.InsertAt(i, node)
@@ -67,7 +66,7 @@ func (n *nodeList) InsertSorted(node *fynetree.TreeNode) error {
 }
 
 // Append adds a node to the end of the Objects.
-func (n *nodeList) Append(node *fynetree.TreeNode) error {
+func (n *NodeList) Append(node *TreeNode) error {
 	if node != nil {
 		n.mux.Lock()
 		n.Objects = append(n.Objects, node)
@@ -81,14 +80,14 @@ func (n *nodeList) Append(node *fynetree.TreeNode) error {
 }
 
 // Remove the child node at the given position and return it. An error is returned if the index is invalid or the node is not found.
-func (n *nodeList) RemoveAt(position int) (removedNode fyne.CanvasObject, err error) {
+func (n *NodeList) RemoveAt(position int) (removedNode fyne.CanvasObject, err error) {
 	n.mux.Lock()
 	removedNode, err = n.removeAtImpl(position)
 	n.mux.Unlock()
 	return
 }
 
-func (n *nodeList) removeAtImpl(position int) (removedNode fyne.CanvasObject, err error) {
+func (n *NodeList) removeAtImpl(position int) (removedNode fyne.CanvasObject, err error) {
 	childrenLen := len(n.Objects)
 	if position == 0 {
 		removedNode = n.Objects[position]
@@ -110,7 +109,7 @@ func (n *nodeList) removeAtImpl(position int) (removedNode fyne.CanvasObject, er
 }
 
 // Remove searches for the given node to remove and return it if it exists, returns nil and an error otherwise.
-func (n *nodeList) Remove(node *fynetree.TreeNode) (removedNode fyne.CanvasObject, err error) {
+func (n *NodeList) Remove(node *TreeNode) (removedNode fyne.CanvasObject, err error) {
 	n.mux.Lock()
 	if node != nil {
 		for i, existing := range n.Objects {

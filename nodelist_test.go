@@ -1,40 +1,39 @@
-package data
+package fynetree
 
 import (
 	"fmt"
 	"fyne.io/fyne"
-	"github.com/drognisep/fynetree"
 	"testing"
 )
 
-var list *nodeList
-var modelA *fynetree.StaticNodeModel
-var modelB *fynetree.StaticNodeModel
-var modelC *fynetree.StaticNodeModel
-var modelD *fynetree.StaticNodeModel
-var nodeA *fynetree.TreeNode
-var nodeB *fynetree.TreeNode
-var nodeC *fynetree.TreeNode
-var nodeD *fynetree.TreeNode
+var list *NodeList
+var listModelA *StaticNodeModel
+var listModelB *StaticNodeModel
+var listModelC *StaticNodeModel
+var listModelD *StaticNodeModel
+var listNodeA *TreeNode
+var listNodeB *TreeNode
+var listNodeC *TreeNode
+var listNodeD *TreeNode
 
-func setup() {
-	list = &nodeList{}
-	modelA = fynetree.NewStaticBoundModel(nil, "A")
-	modelB = fynetree.NewStaticBoundModel(nil, "B")
-	modelC = fynetree.NewStaticBoundModel(nil, "C")
-	modelD = fynetree.NewStaticBoundModel(nil, "D")
-	nodeA = modelA.Node
-	nodeB = modelB.Node
-	nodeC = modelC.Node
-	nodeD = modelD.Node
+func listSetup() {
+	list = &NodeList{}
+	listModelA = NewStaticBoundModel(nil, "A")
+	listModelB = NewStaticBoundModel(nil, "B")
+	listModelC = NewStaticBoundModel(nil, "C")
+	listModelD = NewStaticBoundModel(nil, "D")
+	listNodeA = listModelA.Node
+	listNodeB = listModelB.Node
+	listNodeC = listModelC.Node
+	listNodeD = listModelD.Node
 }
 
 func TestNodeList_Append(t *testing.T) {
-	setup()
+	listSetup()
 	if want, got := 0, list.Len(); got != want {
 		t.Errorf("Root node should have no children")
 	}
-	nodes := []*fynetree.TreeNode{nodeA, nodeB, nodeC}
+	nodes := []*TreeNode{listNodeA, listNodeB, listNodeC}
 	for i, n := range nodes {
 		fmt.Println("TestNodeList_Append iteration", i)
 		err := list.Append(n)
@@ -57,8 +56,8 @@ func TestNodeList_Append(t *testing.T) {
 }
 
 func TestNodeList_RemoveAt(t *testing.T) {
-	setup()
-	nodes := []*fynetree.TreeNode{nodeA, nodeB, nodeC, nodeD}
+	listSetup()
+	nodes := []*TreeNode{listNodeA, listNodeB, listNodeC, listNodeD}
 	for i, n := range nodes {
 		err := list.Append(n)
 		if err != nil {
@@ -76,12 +75,12 @@ func TestNodeList_RemoveAt(t *testing.T) {
 		name         string
 		removeAtPos  int
 		nodeName     string
-		expectedNode *fynetree.TreeNode
+		expectedNode *TreeNode
 	}{
-		{name: "Remove nodeA", removeAtPos: 0, nodeName: "nodeA", expectedNode: nodeA},
-		{name: "Remove nodeC", removeAtPos: 1, nodeName: "nodeC", expectedNode: nodeC},
-		{name: "Remove nodeD", removeAtPos: 1, nodeName: "nodeD", expectedNode: nodeD},
-		{name: "Remove nodeB", removeAtPos: 0, nodeName: "nodeB", expectedNode: nodeB},
+		{name: "Remove listNodeA", removeAtPos: 0, nodeName: "listNodeA", expectedNode: listNodeA},
+		{name: "Remove listNodeC", removeAtPos: 1, nodeName: "listNodeC", expectedNode: listNodeC},
+		{name: "Remove listNodeD", removeAtPos: 1, nodeName: "listNodeD", expectedNode: listNodeD},
+		{name: "Remove listNodeB", removeAtPos: 0, nodeName: "listNodeB", expectedNode: listNodeB},
 	}
 
 	for _, tc := range tests {
@@ -107,9 +106,9 @@ func TestNodeList_RemoveAt(t *testing.T) {
 }
 
 func TestNodeList_InsertAt(t *testing.T) {
-	setup()
-	nodes := []*fynetree.TreeNode{nodeA, nodeB, nodeC}
-	nodeInsertionOrder := []*fynetree.TreeNode{nodeB, nodeC, nodeA}
+	listSetup()
+	nodes := []*TreeNode{listNodeA, listNodeB, listNodeC}
+	nodeInsertionOrder := []*TreeNode{listNodeB, listNodeC, listNodeA}
 	insertionIndices := []int{0, 0, 1}
 
 	for i, position := range insertionIndices {
@@ -126,7 +125,7 @@ func TestNodeList_InsertAt(t *testing.T) {
 		}
 	}
 
-	err := list.InsertAt(999, nodeD)
+	err := list.InsertAt(999, listNodeD)
 	if err == nil {
 		t.Errorf("Should have returned an error for index out of bounds")
 	}
@@ -137,18 +136,18 @@ func TestNodeList_InsertAt(t *testing.T) {
 }
 
 func TestNodeList_InsertSorted(t *testing.T) {
-	setup()
-	a := fynetree.NewTreeNode(fynetree.NewStaticModel(nil, "A"))
-	b := fynetree.NewTreeNode(fynetree.NewStaticModel(nil, "B"))
-	c := fynetree.NewTreeNode(fynetree.NewStaticModel(nil, "c"))
-	d := fynetree.NewTreeNode(fynetree.NewStaticModel(nil, "D"))
-	empty := fynetree.NewTreeNode(fynetree.NewStaticModel(nil, ""))
+	listSetup()
+	a := NewTreeNode(NewStaticModel(nil, "A"))
+	b := NewTreeNode(NewStaticModel(nil, "B"))
+	c := NewTreeNode(NewStaticModel(nil, "c"))
+	d := NewTreeNode(NewStaticModel(nil, "D"))
+	empty := NewTreeNode(NewStaticModel(nil, ""))
 
 	if childLen := list.Len(); childLen != 0 {
 		t.Errorf("List should be empty")
 	}
 
-	insertionOrder := []*fynetree.TreeNode{b, a, d, c, empty}
+	insertionOrder := []*TreeNode{b, a, d, c, empty}
 	for _, c := range insertionOrder {
 		err := list.InsertSorted(c)
 		if err != nil {
@@ -159,7 +158,7 @@ func TestNodeList_InsertSorted(t *testing.T) {
 	items := list.Objects
 	tests := map[string]struct {
 		index        int
-		expectedNode *fynetree.TreeNode
+		expectedNode *TreeNode
 		nodeName     string
 	}{
 		"First node":  {index: 0, expectedNode: empty, nodeName: "empty"},
@@ -179,8 +178,8 @@ func TestNodeList_InsertSorted(t *testing.T) {
 }
 
 func TestNodeList_Remove(t *testing.T) {
-	setup()
-	nodes := []*fynetree.TreeNode{nodeA, nodeB, nodeC}
+	listSetup()
+	nodes := []*TreeNode{listNodeA, listNodeB, listNodeC}
 	for i, n := range nodes {
 		err := list.Append(n)
 		if err != nil {
@@ -198,9 +197,9 @@ func TestNodeList_Remove(t *testing.T) {
 		}
 	}
 
-	_, err := list.Remove(nodeD)
+	_, err := list.Remove(listNodeD)
 	if err == nil {
-		t.Errorf("Should have returned an error when attempting to remove non-existent nodeD")
+		t.Errorf("Should have returned an error when attempting to remove non-existent listNodeD")
 	}
 
 	_, err = list.Remove(nil)
@@ -214,7 +213,7 @@ func TestNodeList_Remove(t *testing.T) {
 }
 
 func TestNodeList_OnAfterAddition(t *testing.T) {
-	setup()
+	listSetup()
 	if list.Len() != 0 {
 		t.Fatalf("List should be empty")
 	}
@@ -227,18 +226,18 @@ func TestNodeList_OnAfterAddition(t *testing.T) {
 
 	insertTests := []struct {
 		testName string
-		insertedNode *fynetree.TreeNode
+		insertedNode *TreeNode
 		expectedNumInserted int
 		insertFunc func() error
 	} {
-		{testName: "Append", insertedNode: nodeA, expectedNumInserted: 1, insertFunc: func() error {
-			return list.Append(nodeA)
+		{testName: "Append", insertedNode: listNodeA, expectedNumInserted: 1, insertFunc: func() error {
+			return list.Append(listNodeA)
 		}},
-		{testName: "InsertSorted", insertedNode: nodeB, expectedNumInserted: 2, insertFunc: func() error {
-			return list.InsertSorted(nodeB)
+		{testName: "InsertSorted", insertedNode: listNodeB, expectedNumInserted: 2, insertFunc: func() error {
+			return list.InsertSorted(listNodeB)
 		}},
-		{testName: "InsertAt", insertedNode: nodeC, expectedNumInserted: 3, insertFunc: func() error {
-			return list.InsertAt(0, nodeC)
+		{testName: "InsertAt", insertedNode: listNodeC, expectedNumInserted: 3, insertFunc: func() error {
+			return list.InsertAt(0, listNodeC)
 		}},
 	}
 
@@ -255,14 +254,14 @@ func TestNodeList_OnAfterAddition(t *testing.T) {
 	}
 
 	removalTests := map[string]struct {
-		removedNode *fynetree.TreeNode
+		removedNode *TreeNode
 		removeFunc func() (fyne.CanvasObject, error)
 	} {
-		"RemoveAt": {removedNode: nodeC, removeFunc: func() (fyne.CanvasObject, error) {
+		"RemoveAt": {removedNode: listNodeC, removeFunc: func() (fyne.CanvasObject, error) {
 			return list.RemoveAt(0)
 		}},
-		"Remove": {removedNode: nodeB, removeFunc: func() (fyne.CanvasObject, error) {
-			return list.Remove(nodeB)
+		"Remove": {removedNode: listNodeB, removeFunc: func() (fyne.CanvasObject, error) {
+			return list.Remove(listNodeB)
 		}},
 	}
 
@@ -285,7 +284,7 @@ func TestNodeList_OnAfterAddition(t *testing.T) {
 }
 
 func TestNodeList_OnAfterRemoval(t *testing.T) {
-	setup()
+	listSetup()
 	if list.Len() != 0 {
 		t.Fatalf("List should be empty")
 	}
@@ -298,17 +297,17 @@ func TestNodeList_OnAfterRemoval(t *testing.T) {
 
 	insertTests := []struct {
 		testName           string
-		insertedNode       *fynetree.TreeNode
+		insertedNode       *TreeNode
 		insertFunc         func() error
 	} {
-		{testName: "Append", insertedNode: nodeA, insertFunc: func() error {
-			return list.Append(nodeA)
+		{testName: "Append", insertedNode: listNodeA, insertFunc: func() error {
+			return list.Append(listNodeA)
 		}},
-		{testName: "InsertSorted", insertedNode: nodeB, insertFunc: func() error {
-			return list.InsertSorted(nodeB)
+		{testName: "InsertSorted", insertedNode: listNodeB, insertFunc: func() error {
+			return list.InsertSorted(listNodeB)
 		}},
-		{testName: "InsertAt", insertedNode: nodeC, insertFunc: func() error {
-			return list.InsertAt(0, nodeC)
+		{testName: "InsertAt", insertedNode: listNodeC, insertFunc: func() error {
+			return list.InsertAt(0, listNodeC)
 		}},
 	}
 
@@ -328,15 +327,15 @@ func TestNodeList_OnAfterRemoval(t *testing.T) {
 
 	removalTests := []struct {
 		testName           string
-		removedNode        *fynetree.TreeNode
+		removedNode        *TreeNode
 		removeFunc         func() (fyne.CanvasObject, error)
 		expectedRemovedNum int
 	} {
-		{testName: "RemoveAt", removedNode: nodeC, removeFunc: func() (fyne.CanvasObject, error) {
+		{testName: "RemoveAt", removedNode: listNodeC, removeFunc: func() (fyne.CanvasObject, error) {
 			return list.RemoveAt(0)
 		}, expectedRemovedNum: 1},
-		{testName: "Remove", removedNode: nodeB, removeFunc: func() (fyne.CanvasObject, error) {
-			return list.Remove(nodeB)
+		{testName: "Remove", removedNode: listNodeB, removeFunc: func() (fyne.CanvasObject, error) {
+			return list.Remove(listNodeB)
 		}, expectedRemovedNum: 2},
 	}
 
