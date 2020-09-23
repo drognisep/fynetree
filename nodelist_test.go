@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-var list *NodeList
+var list *nodeList
 var listModelA *StaticNodeModel
 var listModelB *StaticNodeModel
 var listModelC *StaticNodeModel
@@ -17,7 +17,7 @@ var listNodeC *TreeNode
 var listNodeD *TreeNode
 
 func listSetup() {
-	list = &NodeList{}
+	list = &nodeList{}
 	listModelA = NewStaticBoundModel(nil, "A")
 	listModelB = NewStaticBoundModel(nil, "B")
 	listModelC = NewStaticBoundModel(nil, "C")

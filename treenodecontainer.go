@@ -10,7 +10,7 @@ import (
 // TreeContainer widget simplifies display of several root tree nodes.
 type TreeContainer struct {
 	widget.ScrollContainer
-	*NodeList
+	*nodeList
 	Background color.Color
 
 	mux           sync.Mutex
@@ -26,7 +26,7 @@ func NewTreeContainer() *TreeContainer {
 	}
 	container.ExtendBaseWidget(container)
 	container.ScrollContainer.Content = vboxContainer
-	container.NodeList = &NodeList{
+	container.nodeList = &nodeList{
 		OnAfterAddition: func(item fyne.CanvasObject) {
 			if item == nil {
 				panic("Added nil root node")
@@ -56,7 +56,7 @@ func (t *TreeContainer) NumRoots() int {
 }
 
 func (t *TreeContainer) Refresh() {
-	t.vboxContainer.Children = t.NodeList.Objects
+	t.vboxContainer.Children = t.nodeList.Objects
 	t.vboxContainer.Refresh()
 	t.ScrollContainer.Refresh()
 }

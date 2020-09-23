@@ -12,7 +12,7 @@ type NodeEventHandler func()
 // TreeNode holds a TreeNodeModel's position within the view.
 type TreeNode struct {
 	widget.BaseWidget
-	*NodeList
+	*nodeList
 	model             TreeNodeModel
 	expanded          bool
 	leaf              bool
@@ -47,7 +47,7 @@ func InitTreeNode(newNode *TreeNode, model TreeNodeModel) {
 }
 
 func (n *TreeNode) initNodeListEvents() {
-	n.NodeList = &NodeList{
+	n.nodeList = &nodeList{
 		OnAfterAddition: func(item fyne.CanvasObject) {
 			if item == nil {
 				panic("Inserted nil object")
@@ -146,7 +146,7 @@ func (n *TreeNode) Expand() {
 }
 
 func (n *TreeNode) showChildren() {
-	for _, c := range n.NodeList.Objects {
+	for _, c := range n.nodeList.Objects {
 		c.Show()
 	}
 }
@@ -164,7 +164,7 @@ func (n *TreeNode) Condense() {
 }
 
 func (n *TreeNode) hideChildren() {
-	for _, c := range n.NodeList.Objects {
+	for _, c := range n.nodeList.Objects {
 		c.Hide()
 	}
 }

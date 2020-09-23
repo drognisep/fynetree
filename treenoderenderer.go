@@ -55,7 +55,7 @@ func (renderer treeEntryRenderer) Layout(container fyne.Size) {
 	}
 	if node.IsBranch() && node.IsExpanded() {
 		var runningY = itemsHeight
-		for _, c := range node.NodeList.Objects {
+		for _, c := range node.nodeList.Objects {
 			cSize := c.MinSize()
 			c.Move(fyne.NewPos(HierarchyPadding, runningY))
 			c.Resize(fyne.NewSize(container.Width-HierarchyPadding, cSize.Height))
@@ -63,7 +63,7 @@ func (renderer treeEntryRenderer) Layout(container fyne.Size) {
 			c.Show()
 		}
 	} else {
-		for _, c := range node.NodeList.Objects {
+		for _, c := range node.nodeList.Objects {
 			c.Hide()
 		}
 	}
@@ -72,7 +72,7 @@ func (renderer treeEntryRenderer) Layout(container fyne.Size) {
 func (renderer treeEntryRenderer) MinSize() fyne.Size {
 	entryItemsSize := renderer.entryItemsMinSize()
 	var childrenSize fyne.Size
-	for _, c := range renderer.node.NodeList.Objects {
+	for _, c := range renderer.node.nodeList.Objects {
 		if c.Visible() {
 			childSize := c.MinSize()
 			childrenSize = fyne.Size{
@@ -122,7 +122,7 @@ func (renderer treeEntryRenderer) BackgroundColor() color.Color {
 }
 
 func (renderer *treeEntryRenderer) Objects() []fyne.CanvasObject {
-	return append([]fyne.CanvasObject{renderer.handle, renderer.icon, renderer.label}, renderer.node.NodeList.Objects...)
+	return append([]fyne.CanvasObject{renderer.handle, renderer.icon, renderer.label}, renderer.node.nodeList.Objects...)
 }
 
 func (renderer *treeEntryRenderer) Destroy() {
