@@ -11,9 +11,9 @@ Which really helped me understand what's going on under the covers more too. :)
 - [x] ~~Create base tree node widget with custom layout and dynamic event handling~~
 - [x] ~~Create tree node container~~
 - [x] ~~Provide InsertSorted method~~
+- [x] ~~Handle custom secondary tap menu and logic~~
 - [ ] Provide icon and text tap event hooks
 - [ ] Try out some selection model ideas
-- [ ] Handle custom secondary tap menu and logic
 - [ ] Possibly create factory methods to create leaf/branch nodes instead of setting leaf
 explicitly after creation
 
@@ -80,11 +80,12 @@ data can be changed by the model with a node refresh.
 ```golang
 type TreeNode struct {
 	widget.BaseWidget
-	model         model.TreeNodeModel
-	expanded      bool
-	beforeExpand  model.NodeEventHandler
-	afterCondense model.NodeEventHandler
-	leaf          bool
+	model             TreeNodeModel
+	expanded          bool
+	leaf              bool
+	OnBeforeExpand    NodeEventHandler
+	OnAfterCondense   NodeEventHandler
+	OnTappedSecondary func(pe *fyne.PointEvent)
 
 	mux      sync.Mutex
 	parent   *TreeNode
@@ -110,15 +111,24 @@ enough to add to most any consumer view without compromising layout expectations
 
 /* ... */
 treeContainer := fynetree.NewTreeContainer()
-rootNode := fynetree.NewTreeNode(model.NewStaticModel(theme.FolderOpenIcon(), "Tasks"))
+rootModel := fynetree.NewStaticBoundModel(theme.FolderOpenIcon(), "Tasks")
+notesNode := fynetree.NewTreeNode(fynetree.NewStaticModel(theme.FolderIcon(), "Notes"))
 exampleTask := &example.Task{
     Summary:     "Hello!",
     Description: "This is an example Task",
+    Menu: fyne.NewMenu("", fyne.NewMenuItem("Say Hello", func() {
+        dialog.ShowInformation("Hello", "Hello from a popup menu!", win)
+    })),
 }
 exampleNode := fynetree.NewTreeNode(exampleTask)
 exampleNode.SetLeaf()
-_ = rootNode.Append(exampleNode)
-_ = treeContainer.Append(rootNode)
+exampleNode.OnTappedSecondary = func(pe *fyne.PointEvent) {
+    canvas := fyne.CurrentApp().Driver().CanvasForObject(exampleNode)
+    widget.ShowPopUpMenuAtPosition(exampleTask.Menu, canvas, pe.AbsolutePosition)
+}
+_ = rootModel.Node.Append(exampleNode)
+_ = treeContainer.Append(rootModel.Node)
+_ = treeContainer.Append(notesNode)
 /* ... */
 ```
 

@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/widget"
 	"github.com/drognisep/fynetree"
 	"github.com/drognisep/fynetree/example"
-	"github.com/drognisep/fynetree/model"
 )
 
 func main() {
@@ -18,17 +17,26 @@ func main() {
 	win.Resize(fyne.NewSize(640, 480))
 
 	treeContainer := fynetree.NewTreeContainer()
-	rootNode := fynetree.NewTreeNode(model.NewStaticModel(theme.FolderOpenIcon(), "Tasks"))
+	rootModel := fynetree.NewStaticBoundModel(theme.FolderOpenIcon(), "Tasks")
+	notesNode := fynetree.NewTreeNode(fynetree.NewStaticModel(theme.FolderIcon(), "Notes"))
 	exampleTask := &example.Task{
 		Summary:     "Hello!",
 		Description: "This is an example Task",
+		Menu: fyne.NewMenu("", fyne.NewMenuItem("Say Hello", func() {
+			dialog.ShowInformation("Hello", "Hello from a popup menu!", win)
+		})),
 	}
 	exampleNode := fynetree.NewTreeNode(exampleTask)
 	exampleNode.SetLeaf()
-	_ = rootNode.Append(exampleNode)
-	_ = treeContainer.Append(rootNode)
+	exampleNode.OnTappedSecondary = func(pe *fyne.PointEvent) {
+		canvas := fyne.CurrentApp().Driver().CanvasForObject(exampleNode)
+		widget.ShowPopUpMenuAtPosition(exampleTask.Menu, canvas, pe.AbsolutePosition)
+	}
+	_ = rootModel.Node.Append(exampleNode)
+	_ = treeContainer.Append(rootModel.Node)
+	_ = treeContainer.Append(notesNode)
 
-	addBtn := widget.NewButton("Add Task", addBtnClicked(rootNode, win))
+	addBtn := widget.NewButton("Add Task", addBtnClicked(rootModel.Node, win))
 	btnBox := widget.NewVBox(addBtn)
 
 	split := widget.NewHSplitContainer(treeContainer, fyne.NewContainerWithLayout(
@@ -52,7 +60,7 @@ func addBtnClicked(rootNode *fynetree.TreeNode, window fyne.Window) func() {
 				taskNode := example.NewTaskNode(summary, desc)
 				_ = rootNode.InsertSorted(taskNode)
 				taskNode.Expand()
-				subTask := fynetree.NewTreeNode(model.NewStaticModel(theme.CheckButtonIcon(), "Do this"))
+				subTask := fynetree.NewTreeNode(fynetree.NewStaticModel(theme.CheckButtonIcon(), "Do this"))
 				subTask.SetLeaf()
 				_ = taskNode.Append(subTask)
 			}
