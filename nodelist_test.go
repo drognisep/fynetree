@@ -354,3 +354,31 @@ func TestNodeList_OnAfterRemoval(t *testing.T) {
 		})
 	}
 }
+
+func TestNodeList_IndexOf(t *testing.T) {
+	listSetup()
+	for i, n := range []*TreeNode{listNodeA, listNodeB, listNodeC} {
+		err := list.Append(n)
+		if err != nil {
+			t.Fatalf("Failed to insert node %d", i)
+		}
+	}
+
+	tests := map[string]struct {
+		node *TreeNode
+		index int
+	} {
+		"IndexOf NodeA": {node: listNodeA, index: 0},
+		"IndexOf NodeB": {node: listNodeB, index: 1},
+		"IndexOf NodeC": {node: listNodeC, index: 2},
+		"IndexOf NodeD": {node: listNodeD, index: -1},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			if got, want := list.IndexOf(tc.node), tc.index; got != want {
+				t.Fatalf("Expected index %d for %s, got %d", want, name, got)
+			}
+		})
+	}
+}

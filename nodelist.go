@@ -126,3 +126,15 @@ func (n *nodeList) Remove(node *TreeNode) (removedNode fyne.CanvasObject, err er
 	n.mux.Unlock()
 	return nil, errors.New("unable to locate node")
 }
+
+// IndexOf returns the index of the given node in the list if it's present, -1 otherwise.
+func (n *nodeList) IndexOf(node *TreeNode) int {
+	for i, obj := range n.Objects {
+		if nodeFound, ok := obj.(*TreeNode); ok {
+			if nodeFound == node {
+				return i
+			}
+		}
+	}
+	return -1
+}
