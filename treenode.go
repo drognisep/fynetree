@@ -136,10 +136,10 @@ func (n *TreeNode) Condense() {
 	if n.IsBranch() && n.IsExpanded() {
 		n.expanded = false
 		n.hideChildren()
+		n.Refresh()
 		if n.OnAfterCondense != nil {
 			n.OnAfterCondense()
 		}
-		n.Refresh()
 	}
 }
 

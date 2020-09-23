@@ -18,6 +18,7 @@ func main() {
 
 	treeContainer := fynetree.NewTreeContainer()
 	rootModel := fynetree.NewStaticBoundModel(theme.FolderOpenIcon(), "Tasks")
+	notesNode := fynetree.NewTreeNode(fynetree.NewStaticModel(theme.FolderIcon(), "Notes"))
 	exampleTask := &example.Task{
 		Summary:     "Hello!",
 		Description: "This is an example Task",
@@ -33,6 +34,7 @@ func main() {
 	}
 	_ = rootModel.Node.Append(exampleNode)
 	_ = treeContainer.Append(rootModel.Node)
+	_ = treeContainer.Append(notesNode)
 
 	addBtn := widget.NewButton("Add Task", addBtnClicked(rootModel.Node, win))
 	btnBox := widget.NewVBox(addBtn)
