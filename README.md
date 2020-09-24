@@ -78,8 +78,13 @@ programmatically expanded or condensed, event receivers can be registered, and t
 data can be changed by the model with a node refresh.
 
 ```golang
+// NodeEventHandler is a handler function for node events triggered by the view.
+type NodeEventHandler func()
+
+// TreeNode holds a TreeNodeModel's position within the view.
 type TreeNode struct {
 	widget.BaseWidget
+	*nodeList
 	model             TreeNodeModel
 	expanded          bool
 	leaf              bool
@@ -89,13 +94,7 @@ type TreeNode struct {
 
 	mux      sync.Mutex
 	parent   *TreeNode
-	children []fyne.CanvasObject
 }
-
-// Defined in the model package
-
-// NodeEventHandler is a handler function for node events triggered by the view.
-type NodeEventHandler func()
 ```
 
 The view is completely defined by the renderer. This keeps view behavior and complexity neatly
