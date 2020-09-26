@@ -9,6 +9,9 @@ import (
 // NodeEventHandler is a handler function for node events triggered by the view.
 type NodeEventHandler func()
 
+// TapEventHandler is a handler function for tap events triggered by the view.
+type TapEventHandler func(pe *fyne.PointEvent)
+
 // TreeNode holds a TreeNodeModel's position within the view.
 type TreeNode struct {
 	widget.BaseWidget
@@ -18,7 +21,9 @@ type TreeNode struct {
 	leaf              bool
 	OnBeforeExpand    NodeEventHandler
 	OnAfterCondense   NodeEventHandler
-	OnTappedSecondary func(pe *fyne.PointEvent)
+	OnTappedSecondary TapEventHandler
+	OnIconTapped      TapEventHandler
+	OnLabelTapped     TapEventHandler
 
 	mux      sync.Mutex
 	parent   *TreeNode
