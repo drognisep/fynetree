@@ -28,7 +28,7 @@ func setup() {
 	nodeD = NewTreeNode(modelD)
 }
 
-func TestNewTreeEntry(t *testing.T) {
+func TestNewTreeNode(t *testing.T) {
 	setup()
 
 	_ = rootNode.Append(nodeA)
@@ -65,6 +65,28 @@ func TestNewTreeEntry(t *testing.T) {
 	}
 
 	win.Close()
+}
+
+func TestNewBranchTreeNode(t *testing.T) {
+	newNode := NewBranchTreeNode(NewStaticModel(nil, "New branch"))
+	if newNode == nil {
+		t.Fatal("'newNode' is nil")
+	}
+
+	if got := newNode.IsBranch(); got != true {
+		t.Fatalf("Wanted IsBranch = true, got %v", got)
+	}
+}
+
+func TestNewLeafTreeNode(t *testing.T) {
+	newNode := NewLeafTreeNode(NewStaticModel(nil, "New leaf"))
+	if newNode == nil {
+		t.Fatal("'newNode' is nil")
+	}
+
+	if got := newNode.IsLeaf(); got != true {
+		t.Fatalf("Wanted IsLeaf = true, got %v", got)
+	}
 }
 
 func TestTreeNode_AddRemove(t *testing.T) {

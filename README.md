@@ -12,10 +12,10 @@ Which really helped me understand what's going on under the covers more too. :)
 - [x] ~~Create tree node container~~
 - [x] ~~Provide InsertSorted method~~
 - [x] ~~Handle custom secondary tap menu and logic~~
-- [ ] Provide icon and text tap event hooks
+- [x] ~~Provide icon and text tap event hooks~~
 - [ ] Try out some selection model ideas
-- [ ] Possibly create factory methods to create leaf/branch nodes instead of setting leaf
-explicitly after creation
+- [x] ~~Possibly create factory methods to create leaf/branch nodes instead of setting leaf
+explicitly after creation~~
 
 ## How to get it
 It's a pure Go library, so using plain `go get github.com/drognisep/fynetree` will get you started.
@@ -81,6 +81,9 @@ data can be changed by the model with a node refresh.
 // NodeEventHandler is a handler function for node events triggered by the view.
 type NodeEventHandler func()
 
+// TapEventHandler is a handler function for tap events triggered by the view.
+type TapEventHandler func(pe *fyne.PointEvent)
+
 // TreeNode holds a TreeNodeModel's position within the view.
 type TreeNode struct {
 	widget.BaseWidget
@@ -90,7 +93,9 @@ type TreeNode struct {
 	leaf              bool
 	OnBeforeExpand    NodeEventHandler
 	OnAfterCondense   NodeEventHandler
-	OnTappedSecondary func(pe *fyne.PointEvent)
+	OnTappedSecondary TapEventHandler
+	OnIconTapped      TapEventHandler
+	OnLabelTapped     TapEventHandler
 
 	mux      sync.Mutex
 	parent   *TreeNode
@@ -109,22 +114,34 @@ enough to add to most any consumer view without compromising layout expectations
 // This is an excerpt from the example app. Clone the project to try it out.
 
 /* ... */
+// Create a ready-made container
 treeContainer := fynetree.NewTreeContainer()
+// Used to make a node and model at the same time
 rootModel := fynetree.NewStaticBoundModel(theme.FolderOpenIcon(), "Tasks")
+// Or created separately with a provided model
 notesNode := fynetree.NewTreeNode(fynetree.NewStaticModel(theme.FolderIcon(), "Notes"))
+createPopupFunc := func(msg string) func() {
+    return func() {
+        dialog.ShowInformation("Hello", msg, win)
+    }
+}
+// Task defined elsewhere
 exampleTask := &example.Task{
     Summary:     "Hello!",
     Description: "This is an example Task",
-    Menu: fyne.NewMenu("", fyne.NewMenuItem("Say Hello", func() {
-        dialog.ShowInformation("Hello", "Hello from a popup menu!", win)
-    })),
+    Menu: fyne.NewMenu("", fyne.NewMenuItem("Say Hello", createPopupFunc("Hello from a popup menu!"))),
 }
-exampleNode := fynetree.NewTreeNode(exampleTask)
-exampleNode.SetLeaf()
+// Factory methods for creating leaf/branch nodes, can be easily changed later
+exampleNode := fynetree.NewLeafTreeNode(exampleTask)
+// General event handler
 exampleNode.OnTappedSecondary = func(pe *fyne.PointEvent) {
     canvas := fyne.CurrentApp().Driver().CanvasForObject(exampleNode)
     widget.ShowPopUpMenuAtPosition(exampleTask.Menu, canvas, pe.AbsolutePosition)
 }
+// Icon tap event handler
+exampleNode.OnIconTapped = func(pe *fyne.PointEvent) {createPopupFunc("Hello from icon tapped!")()}
+// Label tap event handler
+exampleNode.OnLabelTapped = func(pe *fyne.PointEvent) {createPopupFunc("Hello from label tapped!")()}
 _ = rootModel.Node.Append(exampleNode)
 _ = treeContainer.Append(rootModel.Node)
 _ = treeContainer.Append(notesNode)
