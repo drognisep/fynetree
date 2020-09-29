@@ -2,7 +2,6 @@ package fynetree
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
 	"github.com/drognisep/fynetree/util"
 	"image/color"
 )
@@ -14,14 +13,14 @@ const (
 type treeEntryRenderer struct {
 	node   *TreeNode
 	handle *expandHandle
-	icon   *widget.Icon
-	label  *widget.Label
+	icon   *nodeIcon
+	label  *nodeLabel
 }
 
 func newTreeEntryRenderer(node *TreeNode) fyne.WidgetRenderer {
 	handle := NewExpandHandle(node)
-	icon := widget.NewIcon(node.GetModelIconResource())
-	label := widget.NewLabel(node.GetModelText())
+	icon := newNodeIcon(node, node.GetModelIconResource())
+	label := newNodeLabel(node, node.GetModelText())
 	return &treeEntryRenderer{
 		node:   node,
 		handle: handle,
@@ -128,7 +127,9 @@ func (renderer *treeEntryRenderer) Objects() []fyne.CanvasObject {
 func (renderer *treeEntryRenderer) Destroy() {
 	renderer.handle.node = nil
 	renderer.handle = nil
+	renderer.icon.node = nil
 	renderer.icon = nil
+	renderer.label.node = nil
 	renderer.label = nil
 	renderer.node = nil
 }

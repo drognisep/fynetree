@@ -9,6 +9,9 @@ import (
 // NodeEventHandler is a handler function for node events triggered by the view.
 type NodeEventHandler func()
 
+// TapEventHandler is a handler function for tap events triggered by the view.
+type TapEventHandler func(pe *fyne.PointEvent)
+
 // TreeNode holds a TreeNodeModel's position within the view.
 type TreeNode struct {
 	widget.BaseWidget
@@ -18,10 +21,12 @@ type TreeNode struct {
 	leaf              bool
 	OnBeforeExpand    NodeEventHandler
 	OnAfterCondense   NodeEventHandler
-	OnTappedSecondary func(pe *fyne.PointEvent)
+	OnTappedSecondary TapEventHandler
+	OnIconTapped      TapEventHandler
+	OnLabelTapped     TapEventHandler
 
-	mux      sync.Mutex
-	parent   *TreeNode
+	mux    sync.Mutex
+	parent *TreeNode
 }
 
 // NewTreeNode constructs a tree node with the given model.
@@ -29,6 +34,16 @@ func NewTreeNode(model TreeNodeModel) *TreeNode {
 	newNode := &TreeNode{}
 	InitTreeNode(newNode, model)
 	return newNode
+}
+
+func NewBranchTreeNode(model TreeNodeModel) *TreeNode {
+	return NewTreeNode(model)
+}
+
+func NewLeafTreeNode(model TreeNodeModel) *TreeNode {
+	leaf := NewTreeNode(model)
+	leaf.SetLeaf()
+	return leaf
 }
 
 // InitTreeNode initializes the given tree node with the given model. If newNode is nil, then a new one will be created.
@@ -57,7 +72,7 @@ func (n *TreeNode) initNodeListEvents() {
 				n.Refresh()
 			}
 		},
-		OnAfterRemoval:  func(item fyne.CanvasObject) {
+		OnAfterRemoval: func(item fyne.CanvasObject) {
 			if item != nil {
 				if i, ok := item.(*TreeNode); ok {
 					i.parent = nil
