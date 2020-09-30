@@ -129,7 +129,7 @@ createPopupFunc := func(msg string) func() {
 exampleTask := &example.Task{
     Summary:     "Hello!",
     Description: "This is an example Task",
-    Menu: fyne.NewMenu("", fyne.NewMenuItem("Say Hello", createPopupFunc("Hello from a popup menu!"))),
+    Menu:        fyne.NewMenu("", fyne.NewMenuItem("Say Hello", createPopupFunc("Hello from a popup menu!"))),
 }
 // Factory methods for creating leaf/branch nodes, can be easily changed later
 exampleNode := fynetree.NewLeafTreeNode(exampleTask)
@@ -138,10 +138,11 @@ exampleNode.OnTappedSecondary = func(pe *fyne.PointEvent) {
     canvas := fyne.CurrentApp().Driver().CanvasForObject(exampleNode)
     widget.ShowPopUpMenuAtPosition(exampleTask.Menu, canvas, pe.AbsolutePosition)
 }
+exampleNode.OnDoubleTapped = func(pe *fyne.PointEvent) { createPopupFunc("Hello from node double-tapped")() }
 // Icon tap event handler
-exampleNode.OnIconTapped = func(pe *fyne.PointEvent) {createPopupFunc("Hello from icon tapped!")()}
-// Label tap event handler
-exampleNode.OnLabelTapped = func(pe *fyne.PointEvent) {createPopupFunc("Hello from label tapped!")()}
+exampleNode.OnIconTapped = func(pe *fyne.PointEvent) { createPopupFunc("Hello from icon tapped!")() }
+// This would block the node double-tapped event
+// exampleNode.OnLabelTapped = func(pe *fyne.PointEvent) { createPopupFunc("Hello from label tapped!")() }
 _ = rootModel.Node.Append(exampleNode)
 _ = treeContainer.Append(rootModel.Node)
 _ = treeContainer.Append(notesNode)

@@ -5,7 +5,7 @@ import "testing"
 var container *TreeContainer
 
 func containerSetup() {
-	setup()
+	treeNodeSetup()
 	container = NewTreeContainer()
 }
 
