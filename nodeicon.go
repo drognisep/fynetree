@@ -13,7 +13,7 @@ type nodeIcon struct {
 
 func newNodeIcon(node *TreeNode, resource fyne.Resource) *nodeIcon {
 	if node == nil {
-		panic("Can't pass nil node to nodeIcon")
+		panic("Can't pass nil node to nodeLabel")
 	}
 	icon := &nodeIcon{
 		node: node,
