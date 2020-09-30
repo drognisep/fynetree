@@ -24,6 +24,8 @@ type TreeNode struct {
 	OnTappedSecondary TapEventHandler
 	OnIconTapped      TapEventHandler
 	OnLabelTapped     TapEventHandler
+	OnTapped          TapEventHandler
+	OnDoubleTapped    TapEventHandler
 
 	mux    sync.Mutex
 	parent *TreeNode
@@ -86,6 +88,12 @@ func (n *TreeNode) initNodeListEvents() {
 func (n *TreeNode) TappedSecondary(pe *fyne.PointEvent) {
 	if n.OnTappedSecondary != nil {
 		n.OnTappedSecondary(pe)
+	}
+}
+
+func (n *TreeNode) DoubleTapped(pe *fyne.PointEvent) {
+	if n.OnDoubleTapped != nil {
+		n.OnDoubleTapped(pe)
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 )
 
 var rootNode *TreeNode
+var rootModel *StaticNodeModel
 var modelA TreeNodeModel
 var modelB TreeNodeModel
 var modelC TreeNodeModel
@@ -16,8 +17,9 @@ var nodeB *TreeNode
 var nodeC *TreeNode
 var nodeD *TreeNode
 
-func setup() {
-	rootNode = NewTreeNode(NewStaticModel(nil, "root"))
+func treeNodeSetup() {
+	rootModel = NewStaticBoundModel(nil, "root")
+	rootNode = rootModel.Node
 	modelA = NewStaticModel(nil, "A")
 	modelB = NewStaticModel(nil, "B")
 	modelC = NewStaticModel(nil, "C")
@@ -29,7 +31,7 @@ func setup() {
 }
 
 func TestNewTreeNode(t *testing.T) {
-	setup()
+	treeNodeSetup()
 
 	_ = rootNode.Append(nodeA)
 	_ = rootNode.Append(nodeB)
@@ -90,7 +92,7 @@ func TestNewLeafTreeNode(t *testing.T) {
 }
 
 func TestTreeNode_AddRemove(t *testing.T) {
-	setup()
+	treeNodeSetup()
 	if nodeA.parent != nil {
 		t.Fatalf("Node A is in an invalid initial state")
 	}

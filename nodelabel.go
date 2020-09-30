@@ -2,7 +2,6 @@ package fynetree
 
 import (
 	"fyne.io/fyne"
-	"fyne.io/fyne/driver/desktop"
 	"fyne.io/fyne/widget"
 )
 
@@ -25,30 +24,15 @@ func newNodeLabel(node *TreeNode, text string) *nodeLabel {
 }
 
 func (label *nodeLabel) Tapped(pe *fyne.PointEvent) {
-	if onTapped := label.node.OnIconTapped; onTapped != nil {
+	if onTapped := label.node.OnLabelTapped; onTapped != nil {
 		onTapped(pe)
 	}
 }
 
 func (label *nodeLabel) TappedSecondary(pe *fyne.PointEvent) {
-	if onTapped := label.node.OnTappedSecondary; onTapped != nil {
-		onTapped(pe)
-	}
+	label.node.TappedSecondary(pe)
 }
 
-func (label *nodeLabel) MouseDown(me *desktop.MouseEvent) {
-	switch me.Button {
-	case desktop.LeftMouseButton:
-		if onIconTapped := label.node.OnLabelTapped; onIconTapped != nil {
-			onIconTapped(&me.PointEvent)
-		}
-		break
-	case desktop.RightMouseButton:
-		if OnTappedSecondary := label.node.OnTappedSecondary; OnTappedSecondary != nil {
-			OnTappedSecondary(&me.PointEvent)
-		}
-	}
-}
-
-func (label *nodeLabel) MouseUp(_ *desktop.MouseEvent) {
+func (label *nodeLabel) DoubleTapped(pe *fyne.PointEvent) {
+	label.node.DoubleTapped(pe)
 }
