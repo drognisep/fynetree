@@ -13,7 +13,7 @@ Which really helped me understand what's going on under the covers more too. :)
 - [x] ~~Provide InsertSorted method~~
 - [x] ~~Handle custom secondary tap menu and logic~~
 - [x] ~~Provide icon and text tap event hooks~~
-- [ ] Try out some selection model ideas
+- [ ] Won't do for now ~~Try out some selection model ideas~~
 - [x] ~~Possibly create factory methods to create leaf/branch nodes instead of setting leaf
 explicitly after creation~~
 
