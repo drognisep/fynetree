@@ -54,12 +54,12 @@ func InitTreeNode(newNode *TreeNode, model TreeNodeModel) {
 		newNode = &TreeNode{}
 	}
 	newNode.model = model
-	model.SetTreeNode(newNode)
 	newNode.initNodeListEvents()
 	newNode.OnBeforeExpand = func() {}
 	newNode.OnAfterCondense = func() {}
 	newNode.OnTappedSecondary = func(pe *fyne.PointEvent) {}
 	newNode.leaf = false
+	model.SetTreeNode(newNode)
 	newNode.ExtendBaseWidget(newNode)
 }
 
