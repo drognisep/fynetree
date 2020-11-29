@@ -1,15 +1,16 @@
 package fynetree
 
 import (
+	"testing"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/test"
-	"testing"
 )
 
 type expandHandleModel struct{}
 
-func (e *expandHandleModel) SetTreeNode(node *TreeNode) {
+func (e *expandHandleModel) SetTreeNode(_ *TreeNode) {
 }
 
 func (e *expandHandleModel) GetIconResource() fyne.Resource {

@@ -1,52 +1,54 @@
 package fynetree
 
 import (
-	"fyne.io/fyne"
-	"fyne.io/fyne/widget"
 	"image/color"
 	"sync"
+
+	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 )
 
 // TreeContainer widget simplifies display of several root tree nodes.
 type TreeContainer struct {
-	widget.ScrollContainer
+	*container.Scroll
 	*nodeList
 	Background color.Color
 
 	mux           sync.Mutex
-	vboxContainer *widget.Box
+	vboxContainer *fyne.Container
 }
 
 func NewTreeContainer() *TreeContainer {
 	var baseRoots []fyne.CanvasObject
-	vboxContainer := widget.NewVBox(baseRoots...)
-	container := &TreeContainer{
+	vboxContainer := container.NewVBox(baseRoots...)
+	c := &TreeContainer{
+		Scroll:        nil,
 		Background:    color.Transparent,
 		vboxContainer: vboxContainer,
 	}
-	container.ExtendBaseWidget(container)
-	container.ScrollContainer.Content = vboxContainer
-	container.nodeList = &nodeList{
+	c.Scroll = container.NewScroll(vboxContainer)
+	c.ExtendBaseWidget(c)
+	c.nodeList = &nodeList{
 		OnAfterAddition: func(item fyne.CanvasObject) {
 			if item == nil {
 				panic("Added nil root node")
 			}
 			if i, ok := item.(*TreeNode); ok {
 				i.parent = nil
-				container.Refresh()
+				c.Refresh()
 			}
 		},
-		OnAfterRemoval:  func(item fyne.CanvasObject) {
+		OnAfterRemoval: func(item fyne.CanvasObject) {
 			if item != nil {
 				if i, ok := item.(*TreeNode); ok {
 					i.parent = nil
-					container.Refresh()
+					c.Refresh()
 				}
 			}
 		},
 	}
 
-	return container
+	return c
 }
 
 func (t *TreeContainer) NumRoots() int {
@@ -56,7 +58,7 @@ func (t *TreeContainer) NumRoots() int {
 }
 
 func (t *TreeContainer) Refresh() {
-	t.vboxContainer.Children = t.nodeList.Objects
+	t.vboxContainer.Objects = t.nodeList.Objects
 	t.vboxContainer.Refresh()
-	t.ScrollContainer.Refresh()
+	t.Scroll.Refresh()
 }

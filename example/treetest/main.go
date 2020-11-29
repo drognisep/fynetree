@@ -3,6 +3,7 @@ package main
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -50,14 +51,13 @@ func main() {
 	_ = treeContainer.Append(notesNode)
 
 	addBtn := widget.NewButton("Add Task", addBtnClicked(rootModel.Node, win))
-	btnBox := widget.NewVBox(addBtn)
+	btnBox := container.NewVBox(addBtn)
 
-	split := widget.NewHSplitContainer(treeContainer, fyne.NewContainerWithLayout(
+	split := container.NewHSplit(treeContainer, fyne.NewContainerWithLayout(
 		layout.NewBorderLayout(nil, btnBox, nil, nil),
 		btnBox,
 		example.NewDetailView(exampleTask),
 	))
-	split.SetOffset(0.3)
 
 	win.SetContent(split)
 	win.ShowAndRun()

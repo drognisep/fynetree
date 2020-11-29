@@ -1,9 +1,10 @@
 package fynetree
 
 import (
+	"sync"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/widget"
-	"sync"
 )
 
 // NodeEventHandler is a handler function for node events triggered by the view.
