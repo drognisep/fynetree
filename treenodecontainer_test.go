@@ -2,11 +2,11 @@ package fynetree
 
 import "testing"
 
-var container *TreeContainer
+var treeContainer *TreeContainer
 
 func containerSetup() {
 	treeNodeSetup()
-	container = NewTreeContainer()
+	treeContainer = NewTreeContainer()
 }
 
 func TestTreeContainer_AddRemove(t *testing.T) {
@@ -15,13 +15,13 @@ func TestTreeContainer_AddRemove(t *testing.T) {
 		t.Fatalf("Node A is in an invalid initial state")
 	}
 
-	if err := container.Append(nodeA); err != nil {
+	if err := treeContainer.Append(nodeA); err != nil {
 		t.Fatalf("Failed to append node: %v", err)
 	} else if nodeA.parent != nil {
 		t.Fatalf("Node A's parent was set to an actual node")
 	}
 
-	removedObject, err := container.Remove(nodeA)
+	removedObject, err := treeContainer.Remove(nodeA)
 	if err != nil {
 		t.Fatalf("Error occurred removing node: %v", err)
 	} else if removedObject == nil {

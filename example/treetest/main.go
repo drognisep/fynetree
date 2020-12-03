@@ -53,7 +53,7 @@ func main() {
 	addBtn := widget.NewButton("Add Task", addBtnClicked(rootModel.Node, win))
 	btnBox := container.NewVBox(addBtn)
 
-	split := container.NewHSplit(treeContainer, fyne.NewContainerWithLayout(
+	split := container.NewHSplit(container.NewScroll(treeContainer), fyne.NewContainerWithLayout(
 		layout.NewBorderLayout(nil, btnBox, nil, nil),
 		btnBox,
 		example.NewDetailView(exampleTask),
