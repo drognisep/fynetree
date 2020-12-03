@@ -1,12 +1,13 @@
 package example
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 	"github.com/drognisep/fynetree/util"
-	"image/color"
 )
 
 var _ fyne.Widget = (*DetailView)(nil)

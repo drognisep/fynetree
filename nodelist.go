@@ -3,9 +3,10 @@ package fynetree
 import (
 	"errors"
 	"fmt"
-	"fyne.io/fyne"
 	"strings"
 	"sync"
+
+	"fyne.io/fyne"
 )
 
 type nodeList struct {

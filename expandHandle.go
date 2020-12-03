@@ -36,6 +36,6 @@ func (e *expandHandle) Refresh() {
 	}
 }
 
-func (e *expandHandle) Tapped(event *fyne.PointEvent) {
+func (e *expandHandle) Tapped(_ *fyne.PointEvent) {
 	e.node.ToggleExpand()
 }

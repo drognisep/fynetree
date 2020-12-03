@@ -2,8 +2,9 @@ package fynetree
 
 import (
 	"fmt"
-	"fyne.io/fyne"
 	"testing"
+
+	"fyne.io/fyne"
 )
 
 var list *nodeList
@@ -68,8 +69,6 @@ func TestNodeList_RemoveAt(t *testing.T) {
 	if want, got := 4, list.Len(); want != got {
 		t.Errorf("All nodes should have been appended to the root node")
 	}
-
-
 
 	tests := []struct {
 		name         string
@@ -225,11 +224,11 @@ func TestNodeList_OnAfterAddition(t *testing.T) {
 	}
 
 	insertTests := []struct {
-		testName string
-		insertedNode *TreeNode
+		testName            string
+		insertedNode        *TreeNode
 		expectedNumInserted int
-		insertFunc func() error
-	} {
+		insertFunc          func() error
+	}{
 		{testName: "Append", insertedNode: listNodeA, expectedNumInserted: 1, insertFunc: func() error {
 			return list.Append(listNodeA)
 		}},
@@ -255,8 +254,8 @@ func TestNodeList_OnAfterAddition(t *testing.T) {
 
 	removalTests := map[string]struct {
 		removedNode *TreeNode
-		removeFunc func() (fyne.CanvasObject, error)
-	} {
+		removeFunc  func() (fyne.CanvasObject, error)
+	}{
 		"RemoveAt": {removedNode: listNodeC, removeFunc: func() (fyne.CanvasObject, error) {
 			return list.RemoveAt(0)
 		}},
@@ -296,10 +295,10 @@ func TestNodeList_OnAfterRemoval(t *testing.T) {
 	}
 
 	insertTests := []struct {
-		testName           string
-		insertedNode       *TreeNode
-		insertFunc         func() error
-	} {
+		testName     string
+		insertedNode *TreeNode
+		insertFunc   func() error
+	}{
 		{testName: "Append", insertedNode: listNodeA, insertFunc: func() error {
 			return list.Append(listNodeA)
 		}},
@@ -330,7 +329,7 @@ func TestNodeList_OnAfterRemoval(t *testing.T) {
 		removedNode        *TreeNode
 		removeFunc         func() (fyne.CanvasObject, error)
 		expectedRemovedNum int
-	} {
+	}{
 		{testName: "RemoveAt", removedNode: listNodeC, removeFunc: func() (fyne.CanvasObject, error) {
 			return list.RemoveAt(0)
 		}, expectedRemovedNum: 1},
@@ -365,9 +364,9 @@ func TestNodeList_IndexOf(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		node *TreeNode
+		node  *TreeNode
 		index int
-	} {
+	}{
 		"IndexOf NodeA": {node: listNodeA, index: 0},
 		"IndexOf NodeB": {node: listNodeB, index: 1},
 		"IndexOf NodeC": {node: listNodeC, index: 2},

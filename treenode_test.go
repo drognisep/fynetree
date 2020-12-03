@@ -2,8 +2,9 @@ package fynetree
 
 import (
 	"fmt"
-	"fyne.io/fyne/test"
 	"testing"
+
+	"fyne.io/fyne/test"
 )
 
 var rootNode *TreeNode
