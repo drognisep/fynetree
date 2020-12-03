@@ -1,8 +1,9 @@
 package util
 
 import (
-	"fyne.io/fyne"
 	"testing"
+
+	"fyne.io/fyne"
 )
 
 func TestIntMax(t *testing.T) {

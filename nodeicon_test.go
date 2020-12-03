@@ -1,8 +1,9 @@
 package fynetree
 
 import (
-	"fyne.io/fyne"
 	"testing"
+
+	"fyne.io/fyne"
 )
 
 type testNodeIconState struct {
@@ -44,13 +45,13 @@ func TestNodeIcon_Tapped(t *testing.T) {
 	}
 
 	tests := []struct {
-		name string
-		test func()
+		name     string
+		test     func()
 		expected int
-	} {
-		{name: "Tapped", test: func() {state.nodeIcon.Tapped(posEvent)}, expected: 1},
-		{name: "TappedSecondary", test: func() {state.nodeIcon.TappedSecondary(posEvent)}, expected: 2},
-		{name: "DoubleTapped", test: func() {state.nodeIcon.DoubleTapped(posEvent)}, expected: 3},
+	}{
+		{name: "Tapped", test: func() { state.nodeIcon.Tapped(posEvent) }, expected: 1},
+		{name: "TappedSecondary", test: func() { state.nodeIcon.TappedSecondary(posEvent) }, expected: 2},
+		{name: "DoubleTapped", test: func() { state.nodeIcon.DoubleTapped(posEvent) }, expected: 3},
 	}
 
 	for _, tc := range tests {

@@ -1,9 +1,10 @@
 package fynetree
 
 import (
+	"image/color"
+
 	"fyne.io/fyne"
 	"github.com/drognisep/fynetree/util"
-	"image/color"
 )
 
 const (
